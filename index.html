@@ -269,16 +269,10 @@
   }
 
   /* SUBJECTS TABLE */
-  .table-container {
-    width: 100%;
-    overflow-x: auto; /* Added for mobile responsiveness */
-    margin-top: 8px;
-  }
-
   .subjects-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 500px;
+    margin-top: 8px;
   }
 
   .subjects-table th {
@@ -303,7 +297,6 @@
     padding: 6px 8px;
     font-size: 14px;
     border-radius: 6px;
-    min-width: 60px;
   }
 
   .subjects-table input:focus {
@@ -340,6 +333,15 @@
   }
 
   .del-btn:hover { background: rgba(239,68,68,0.3); }
+
+  /* GRADE BADGE */
+  .grade-display {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+  }
 
   /* BUTTONS */
   .btn-row {
@@ -458,33 +460,52 @@
     box-shadow: 0 0 60px rgba(0,0,0,0.5);
     font-family: 'Playfair Display', serif;
     position: relative;
-    /* Added fixed max-width for consistent rendering */
-    max-width: 800px;
-    margin: 0 auto;
   }
 
-  /* THEMES */
-  #marksheet.theme-royal .ms-header, #marksheet.theme-royal .ms-accent, #marksheet.theme-royal .ms-result-bg { background: linear-gradient(135deg, #1e3a8a, #1d4ed8); }
+  /* THEME: Royal Blue */
+  #marksheet.theme-royal .ms-header { background: linear-gradient(135deg, #1e3a8a, #1d4ed8); }
+  #marksheet.theme-royal .ms-accent { background: linear-gradient(135deg, #1e3a8a, #1d4ed8); }
   #marksheet.theme-royal .ms-border-color { color: #1e3a8a; }
-  #marksheet.theme-royal .ms-table th, #marksheet.theme-royal .border-strip { background: #1e3a8a; }
+  #marksheet.theme-royal .ms-table th { background: #1e3a8a; }
+  #marksheet.theme-royal .border-strip { background: #1e3a8a; }
+  #marksheet.theme-royal .ms-result-bg { background: linear-gradient(135deg, #1e3a8a, #1d4ed8); }
 
-  #marksheet.theme-emerald .ms-header, #marksheet.theme-emerald .ms-accent, #marksheet.theme-emerald .ms-result-bg { background: linear-gradient(135deg, #064e3b, #059669); }
+  /* THEME: Emerald */
+  #marksheet.theme-emerald .ms-header { background: linear-gradient(135deg, #064e3b, #059669); }
+  #marksheet.theme-emerald .ms-accent { background: linear-gradient(135deg, #064e3b, #059669); }
   #marksheet.theme-emerald .ms-border-color { color: #064e3b; }
-  #marksheet.theme-emerald .ms-table th, #marksheet.theme-emerald .border-strip { background: #064e3b; }
+  #marksheet.theme-emerald .ms-table th { background: #064e3b; }
+  #marksheet.theme-emerald .border-strip { background: #064e3b; }
+  #marksheet.theme-emerald .ms-result-bg { background: linear-gradient(135deg, #064e3b, #059669); }
 
-  #marksheet.theme-crimson .ms-header, #marksheet.theme-crimson .ms-accent, #marksheet.theme-crimson .ms-result-bg { background: linear-gradient(135deg, #7f1d1d, #dc2626); }
+  /* THEME: Crimson */
+  #marksheet.theme-crimson .ms-header { background: linear-gradient(135deg, #7f1d1d, #dc2626); }
+  #marksheet.theme-crimson .ms-accent { background: linear-gradient(135deg, #7f1d1d, #dc2626); }
   #marksheet.theme-crimson .ms-border-color { color: #7f1d1d; }
-  #marksheet.theme-crimson .ms-table th, #marksheet.theme-crimson .border-strip { background: #7f1d1d; }
+  #marksheet.theme-crimson .ms-table th { background: #7f1d1d; }
+  #marksheet.theme-crimson .border-strip { background: #7f1d1d; }
+  #marksheet.theme-crimson .ms-result-bg { background: linear-gradient(135deg, #7f1d1d, #dc2626); }
 
-  #marksheet.theme-purple .ms-header, #marksheet.theme-purple .ms-accent, #marksheet.theme-purple .ms-result-bg { background: linear-gradient(135deg, #4c1d95, #7c3aed); }
+  /* THEME: Purple */
+  #marksheet.theme-purple .ms-header { background: linear-gradient(135deg, #4c1d95, #7c3aed); }
+  #marksheet.theme-purple .ms-accent { background: linear-gradient(135deg, #4c1d95, #7c3aed); }
   #marksheet.theme-purple .ms-border-color { color: #4c1d95; }
-  #marksheet.theme-purple .ms-table th, #marksheet.theme-purple .border-strip { background: #4c1d95; }
+  #marksheet.theme-purple .ms-table th { background: #4c1d95; }
+  #marksheet.theme-purple .border-strip { background: #4c1d95; }
+  #marksheet.theme-purple .ms-result-bg { background: linear-gradient(135deg, #4c1d95, #7c3aed); }
 
-  #marksheet.theme-gold .ms-header, #marksheet.theme-gold .ms-accent, #marksheet.theme-gold .ms-result-bg { background: linear-gradient(135deg, #78350f, #d97706); }
+  /* THEME: Gold */
+  #marksheet.theme-gold .ms-header { background: linear-gradient(135deg, #78350f, #d97706); }
+  #marksheet.theme-gold .ms-accent { background: linear-gradient(135deg, #78350f, #d97706); }
   #marksheet.theme-gold .ms-border-color { color: #78350f; }
-  #marksheet.theme-gold .ms-table th, #marksheet.theme-gold .border-strip { background: #78350f; }
+  #marksheet.theme-gold .ms-table th { background: #78350f; }
+  #marksheet.theme-gold .border-strip { background: #78350f; }
+  #marksheet.theme-gold .ms-result-bg { background: linear-gradient(135deg, #78350f, #d97706); }
 
-  .border-strip { height: 8px; width: 100%; }
+  .border-strip {
+    height: 8px;
+    width: 100%;
+  }
 
   .ms-header {
     padding: 24px 28px 20px;
@@ -507,7 +528,10 @@
     border: 2px solid rgba(255,255,255,0.4);
   }
 
-  .ms-institute-logo img { width: 100%; height: 100%; object-fit: cover; }
+  .ms-institute-logo img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
 
   .ms-institute-info { flex: 1; text-align: center; }
 
@@ -538,7 +562,9 @@
     border-top: 1px solid rgba(255,255,255,0.2);
   }
 
-  .ms-body { padding: 20px 24px; }
+  .ms-body {
+    padding: 20px 24px;
+  }
 
   .ms-student-row {
     display: flex;
@@ -563,7 +589,11 @@
     font-size: 30px;
   }
 
-  .ms-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .ms-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
   .ms-info-grid {
     flex: 1;
@@ -800,7 +830,6 @@
     .preview-controls { flex-direction: column; }
     .btn { width: 100%; justify-content: center; }
     .steps { font-size: 10px; }
-    .ms-watermark { font-size: 50px; }
   }
 
   .hint-text {
@@ -829,7 +858,7 @@
   <div class="logo-icon">📋</div>
   <div>
     <h1>Marksheet Generator</h1>
-    <p>Smart Teacher Tool — Fill karo, Download karo!</p>
+    <p>Smart Teacher Tool — Fill करो, Download करो!</p>
   </div>
 </header>
 
@@ -859,7 +888,7 @@
     <div class="form-grid">
       <div class="form-group full">
         <label>Institute / School / Coaching Name *</label>
-        <input type="text" id="instituteName" placeholder="e.g. Bindhyachal Academy" required />
+        <input type="text" id="instituteName" placeholder="e.g. Bindhyachal Academy" />
       </div>
       <div class="form-group full">
         <label>Address</label>
@@ -917,7 +946,7 @@
       <div class="form-grid" style="flex:1; margin:0;">
         <div class="form-group full">
           <label>Student Full Name *</label>
-          <input type="text" id="studentName" placeholder="e.g. Rahul Kumar Sharma" required />
+          <input type="text" id="studentName" placeholder="e.g. Rahul Kumar Sharma" />
         </div>
         <div class="form-group">
           <label>Father's Name</label>
@@ -937,7 +966,7 @@
         </div>
         <div class="form-group">
           <label>Exam / Test Name *</label>
-          <input type="text" id="examName" placeholder="e.g. Half Yearly Exam 2024" required />
+          <input type="text" id="examName" placeholder="e.g. Half Yearly Exam 2024" />
         </div>
         <div class="form-group">
           <label>Date of Birth</label>
@@ -945,7 +974,7 @@
         </div>
         <div class="form-group">
           <label>Issue Date</label>
-          <input type="date" id="issueDate" />
+          <input type="date" id="issueDate" value="" />
         </div>
       </div>
     </div>
@@ -963,11 +992,11 @@
     <div class="form-grid" style="margin-bottom:16px;">
       <div class="form-group">
         <label>Maximum Marks per Subject</label>
-        <input type="number" id="maxMarks" placeholder="100" value="100" min="1" onchange="updateMaxAll(this.value)" />
+        <input type="number" id="maxMarks" placeholder="100" value="100" onchange="updateMaxAll(this.value)" />
       </div>
       <div class="form-group">
         <label>Pass Marks (%)</label>
-        <input type="number" id="passPct" placeholder="33" value="33" min="0" max="100" />
+        <input type="number" id="passPct" placeholder="33" value="33" />
       </div>
     </div>
 
@@ -977,23 +1006,21 @@
 
     <br>
 
-    <div class="table-container">
-      <table class="subjects-table" id="subjectsTable">
-        <thead>
-          <tr>
-            <th style="width:30%">Subject Name</th>
-            <th>Max Marks</th>
-            <th>Theory</th>
-            <th>Practical</th>
-            <th>Total</th>
-            <th>Grade</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="subjectsBody">
-        </tbody>
-      </table>
-    </div>
+    <table class="subjects-table" id="subjectsTable">
+      <thead>
+        <tr>
+          <th style="width:30%">Subject Name</th>
+          <th>Max Marks</th>
+          <th>Theory</th>
+          <th>Practical</th>
+          <th>Total</th>
+          <th>Grade</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="subjectsBody">
+      </tbody>
+    </table>
 
     <button class="add-subject-btn" onclick="addSubject()">+ Add Subject</button>
 
@@ -1239,6 +1266,7 @@ function handleLogo(input) {
 
 // ======================== SUBJECTS ========================
 const defaultSubjects = ['Hindi', 'English', 'Mathematics', 'Science', 'Social Science'];
+let maxMarksDefault = 100;
 
 function getGrade(pct) {
   if (pct >= 90) return { g: 'A+', cls: 'grade-a', desc: 'Outstanding' };
@@ -1253,13 +1281,13 @@ function addSubject(name = '', max = '', theory = '', practical = '') {
   const tbody = document.getElementById('subjectsBody');
   const maxVal = document.getElementById('maxMarks').value || 100;
   const row = document.createElement('tr');
-  const rid = Date.now() + Math.floor(Math.random() * 1000);
+  const rid = Date.now();
   row.id = 'row_' + rid;
   row.innerHTML = `
     <td><input type="text" placeholder="Subject name" value="${name}" onchange="calcRow('${rid}')" /></td>
-    <td><input type="number" min="0" placeholder="${maxVal}" value="${max || maxVal}" style="width:70px" onchange="calcRow('${rid}')" id="max_${rid}" /></td>
-    <td><input type="number" min="0" placeholder="0" value="${theory}" style="width:70px" onchange="calcRow('${rid}')" id="th_${rid}" /></td>
-    <td><input type="number" min="0" placeholder="0" value="${practical}" style="width:70px" onchange="calcRow('${rid}')" id="pr_${rid}" /></td>
+    <td><input type="number" placeholder="${maxVal}" value="${max || maxVal}" style="width:70px" onchange="calcRow('${rid}')" id="max_${rid}" /></td>
+    <td><input type="number" placeholder="0" value="${theory}" style="width:70px" onchange="calcRow('${rid}')" id="th_${rid}" /></td>
+    <td><input type="number" placeholder="0" value="${practical}" style="width:70px" onchange="calcRow('${rid}')" id="pr_${rid}" /></td>
     <td id="total_${rid}" style="font-weight:700;">—</td>
     <td id="grade_${rid}">—</td>
     <td><button class="del-btn" onclick="delSubject('row_${rid}')">🗑</button></td>
@@ -1269,16 +1297,14 @@ function addSubject(name = '', max = '', theory = '', practical = '') {
 }
 
 function calcRow(rid) {
-  const max = parseFloat(document.getElementById('max_' + rid)?.value) || 0;
+  const max = parseFloat(document.getElementById('max_' + rid)?.value) || 100;
   const th = parseFloat(document.getElementById('th_' + rid)?.value) || 0;
   const pr = parseFloat(document.getElementById('pr_' + rid)?.value) || 0;
   const total = th + pr;
-  const pct = max > 0 ? (total / max) * 100 : 0; // Fix Division by Zero
+  const pct = (total / max) * 100;
   const grade = getGrade(pct);
-  
   const totalCell = document.getElementById('total_' + rid);
   const gradeCell = document.getElementById('grade_' + rid);
-  
   if (totalCell) totalCell.textContent = total;
   if (gradeCell) gradeCell.innerHTML = `<span class="${grade.cls}">${grade.g}</span>`;
 }
@@ -1290,12 +1316,7 @@ function delSubject(rowId) {
 
 function updateMaxAll(val) {
   document.querySelectorAll('#subjectsBody input[type=number]').forEach(inp => {
-    if (inp.id && inp.id.startsWith('max_')) inp.value = val;
-  });
-  // Recalculate all rows
-  document.querySelectorAll('#subjectsBody tr').forEach(row => {
-    const rid = row.id.split('_')[1];
-    if(rid) calcRow(rid);
+    if (inp.placeholder && inp.id && inp.id.startsWith('max_')) inp.value = val;
   });
 }
 
@@ -1329,12 +1350,7 @@ function generateMarksheet() {
   const className = document.getElementById('className').value || '—';
   const examName = document.getElementById('examName').value || 'Examination';
   const dob = document.getElementById('dob').value;
-  let issueDate = document.getElementById('issueDate').value;
-  
-  if(!issueDate) {
-      issueDate = new Date().toISOString().split('T')[0];
-  }
-
+  const issueDate = document.getElementById('issueDate').value;
   const passPct = parseFloat(document.getElementById('passPct').value) || 33;
 
   // Set theme
@@ -1371,7 +1387,7 @@ function generateMarksheet() {
   document.getElementById('msDob').textContent = dob ? formatDate(dob) : '—';
   document.getElementById('msExam').textContent = examName;
   document.getElementById('msAcadYear').textContent = academicYear || '—';
-  document.getElementById('msIssueDate').textContent = 'Issue Date: ' + formatDate(issueDate);
+  document.getElementById('msIssueDate').textContent = 'Issue Date: ' + (issueDate ? formatDate(issueDate) : '—');
 
   // Photo
   const msPhoto = document.getElementById('msPhoto');
@@ -1391,13 +1407,12 @@ function generateMarksheet() {
   rows.forEach(row => {
     const inputs = row.querySelectorAll('input');
     if (!inputs[0] || !inputs[0].value.trim()) return;
-    
     const subName = inputs[0].value;
-    const max = parseFloat(inputs[1].value) || 0;
+    const max = parseFloat(inputs[1].value) || 100;
     const theory = parseFloat(inputs[2].value) || 0;
     const practical = parseFloat(inputs[3].value) || 0;
     const total = theory + practical;
-    const pct = max > 0 ? (total / max) * 100 : 0;
+    const pct = (total / max) * 100;
     const grade = getGrade(pct);
     const passMarks = (passPct / 100) * max;
 
@@ -1426,7 +1441,7 @@ function generateMarksheet() {
   document.getElementById('msTotalPractical').textContent = totalPractical;
   document.getElementById('msGrandTotal').textContent = grandTotal;
 
-  const overallPct = totalMax > 0 ? (grandTotal / totalMax) * 100 : 0;
+  const overallPct = (grandTotal / totalMax) * 100;
   const overallGrade = getGrade(overallPct);
   document.getElementById('msOverallGrade').innerHTML = `<span class="${overallGrade.cls}">${overallGrade.g}</span>`;
 
@@ -1458,7 +1473,7 @@ function generateMarksheet() {
 function formatDate(dateStr) {
   if (!dateStr) return '—';
   const d = new Date(dateStr);
-  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
 }
 
 // ======================== PDF ========================
@@ -1481,23 +1496,11 @@ async function downloadPDF() {
 
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
-    
-    // Fixed PDF Distorting Issue
-    const imgW = pageW - 10; 
-    let imgH = (canvas.height * imgW) / canvas.width;
-    let finalW = imgW;
-    let finalH = imgH;
+    const imgW = pageW - 10;
+    const imgH = (canvas.height * imgW) / canvas.width;
+    const yOffset = Math.max(5, (pageH - imgH) / 2);
 
-    // If marksheet height is greater than A4 page height, scale it down proportionally
-    if (imgH > pageH - 10) {
-        finalH = pageH - 10;
-        finalW = (canvas.width * finalH) / canvas.height;
-    }
-
-    const xOffset = (pageW - finalW) / 2;
-    const yOffset = (pageH - finalH) / 2; // Centers it vertically if small
-
-    pdf.addImage(imgData, 'JPEG', xOffset, yOffset, finalW, finalH);
+    pdf.addImage(imgData, 'JPEG', 5, yOffset, imgW, Math.min(imgH, pageH - 10));
 
     const studentName = document.getElementById('studentName').value || 'Student';
     pdf.save(`Marksheet_${studentName.replace(/\s+/g, '_')}.pdf`);
@@ -1514,25 +1517,14 @@ function printMarksheet() {
   const content = document.getElementById('marksheet').outerHTML;
   const win = window.open('', '_blank');
   win.document.write(`
-    <html><head><title>Print Marksheet</title>
+    <html><head><title>Marksheet</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-      body { margin: 0; padding: 20px; background: #fff; display: flex; justify-content: center; }
+      body { margin: 0; padding: 10px; background: #fff; }
       ${document.querySelector('style').innerHTML}
-      @media print { 
-          body { padding: 0; } 
-          #marksheet { box-shadow: none; max-width: 100%; } 
-      }
+      @media print { body { padding: 0; } }
     </style>
-    </head><body>${content}
-    <script>
-      // Timeout is used to ensure images/fonts render before printing
-      setTimeout(() => {
-          window.print();
-          window.close();
-      }, 500);
-    <\/script>
-    </body></html>
+    </head><body>${content}<script>window.onload=()=>{window.print(); window.close();}<\/script></body></html>
   `);
   win.document.close();
 }
