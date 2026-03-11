@@ -1,846 +1,1554 @@
 <!DOCTYPE html>
-<html lang="hi" class="scroll-smooth">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drownford Academy - AI Learning Platform</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Drownford Professional (Deep Blue, Gold, White) -->
-    <!-- Application Structure Plan: The application now uses Firebase for authentication and Firestore for data storage, replacing the localStorage simulation. This provides a secure, scalable, and real-time backend. The login flow uses Google Sign-In. All user data (notes, progress, API key) is stored in a user-specific document in Firestore, ensuring data privacy. -->
-    <!-- Visualization & Content Choices: 
-        1. Authentication: Replaced simulated login with Firebase Authentication (Google Provider).
-        2. Data Persistence: Replaced all localStorage calls with Firestore getDoc/setDoc operations for a real-time, cloud-based database.
-        3. UI: The UI remains consistent, but the underlying logic is now powered by a robust backend service.
-        4. Voice Assistant: A new voice assistant feature using the Web Speech API (SpeechRecognition and SpeechSynthesis) has been added. It's activated by a "Drownford Academy" wake word and uses a context-aware Gemini prompt.
-        5. Time Management Tool: A new view with a Pomodoro timer, To-Do list, and study log, all synced with Firestore.
-        6. Gamification: Added XP, levels, and badges to engage users.
-        7. Personalized Paths: AI generates custom learning paths based on user goals.
-        8. Community Hub: A new section to view other users' progress.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-    <style>
-        body {
-            font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
-            background-color: #f0f4f8;
-        }
-        .main-content {
-            transition: margin-left 0.3s ease;
-        }
-        .sidebar {
-            transition: transform 0.3s ease;
-        }
-        .progress-bar-fill {
-            transition: width 0.5s ease-in-out;
-        }
-        .modal {
-            transition: opacity 0.3s ease;
-        }
-        .loader {
-            border-top-color: #4338ca;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .chat-bubble { max-width: 80%; }
-        .chat-bubble-user { background-color: #dbeafe; }
-        .chat-bubble-ai { background-color: #e5e7eb; }
-        .notebook-page {
-            background-color: #fff;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-left: 3px solid #4338ca;
-        }
-        .voice-assistant-indicator {
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { 
-                transform: scale(1);
-                opacity: 1; 
-            }
-            50% { 
-                transform: scale(1.1);
-                opacity: 0.7; 
-            }
-        }
-        .timer-circle {
-            stroke-dasharray: 283;
-            stroke-dashoffset: 0;
-            transition: stroke-dashoffset 1s linear;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marksheet Generator | Smart Teacher Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --gold: #f0c040;
+    --gold2: #e8a920;
+    --dark: #0a0a0f;
+    --dark2: #111118;
+    --dark3: #1a1a28;
+    --card: #13131e;
+    --border: #2a2a3e;
+    --accent: #4f8ef7;
+    --green: #22c55e;
+    --red: #ef4444;
+    --text: #e8e8f0;
+    --muted: #8888aa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(79,142,247,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,247,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper { position: relative; z-index: 1; }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0d0d1a 0%, #131320 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(20px);
+  }
+
+  .logo-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 20px rgba(240,192,64,0.3);
+    flex-shrink: 0;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(16px, 4vw, 22px);
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+
+  header p { font-size: 12px; color: var(--muted); }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  /* STEPS */
+  .steps {
+    display: flex;
+    gap: 0;
+    margin-bottom: 28px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .step {
+    flex: 1;
+    text-align: center;
+    padding: 12px 8px;
+    font-size: 12px;
+    color: var(--muted);
+    border-right: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .step:last-child { border-right: none; }
+
+  .step.active {
+    background: linear-gradient(135deg, rgba(240,192,64,0.15), rgba(240,192,64,0.05));
+    color: var(--gold);
+  }
+
+  .step .num {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  /* FORM SECTIONS */
+  .section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .section.visible { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--gold);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title span { font-size: 20px; }
+
+  /* FORM GRID */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media(max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  input, select, textarea {
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(240,192,64,0.1);
+  }
+
+  select option { background: var(--dark3); }
+
+  /* PHOTO UPLOAD */
+  .photo-upload {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .photo-box {
+    width: 110px;
+    height: 130px;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: var(--dark3);
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .photo-box:hover { border-color: var(--gold); }
+
+  .photo-box img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
+  }
+
+  .photo-box .upload-hint {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    padding: 8px;
+  }
+
+  .photo-box .upload-icon { font-size: 28px; margin-bottom: 6px; }
+
+  input[type="file"] { display: none; }
+
+  /* LOGO UPLOAD */
+  .logo-upload-box {
+    width: 100%;
+    height: 80px;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: var(--dark3);
+    overflow: hidden;
+    position: relative;
+    gap: 12px;
+  }
+
+  .logo-upload-box:hover { border-color: var(--gold); }
+  .logo-upload-box img {
+    max-height: 60px;
+    max-width: 200px;
+    object-fit: contain;
+  }
+
+  /* SUBJECTS TABLE */
+  .table-container {
+    width: 100%;
+    overflow-x: auto; /* Added for mobile responsiveness */
+    margin-top: 8px;
+  }
+
+  .subjects-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 500px;
+  }
+
+  .subjects-table th {
+    background: var(--dark3);
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: left;
+    border: 1px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .subjects-table td {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+  }
+
+  .subjects-table input {
+    border: none;
+    background: transparent;
+    padding: 6px 8px;
+    font-size: 14px;
+    border-radius: 6px;
+    min-width: 60px;
+  }
+
+  .subjects-table input:focus {
+    background: var(--dark3);
+    box-shadow: 0 0 0 2px rgba(240,192,64,0.2);
+  }
+
+  .subjects-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .add-subject-btn {
+    margin-top: 12px;
+    padding: 8px 18px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+
+  .add-subject-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  .del-btn {
+    background: rgba(239,68,68,0.15);
+    border: none;
+    color: var(--red);
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+
+  .del-btn:hover { background: rgba(239,68,68,0.3); }
+
+  /* BUTTONS */
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 13px 28px;
+    border-radius: 10px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #000;
+    box-shadow: 0 4px 20px rgba(240,192,64,0.3);
+  }
+
+  .btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(240,192,64,0.45);
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+  .btn-green {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(34,197,94,0.3);
+  }
+
+  .btn-green:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(34,197,94,0.45);
+  }
+
+  /* THEME SELECTOR */
+  .theme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .theme-card {
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .theme-card.selected { border-color: var(--gold); }
+
+  .theme-preview {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .theme-label {
+    padding: 6px;
+    text-align: center;
+    font-size: 12px;
+    background: var(--dark3);
+    color: var(--muted);
+  }
+
+  /* ===================== MARKSHEET PREVIEW ===================== */
+  #marksheet-preview {
+    display: none;
+  }
+
+  #marksheet-preview.visible { display: block; }
+
+  .preview-controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .preview-label {
+    color: var(--muted);
+    font-size: 14px;
+    flex: 1;
+  }
+
+  /* THE ACTUAL MARKSHEET */
+  #marksheet {
+    background: #fff;
+    color: #111;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(0,0,0,0.5);
+    font-family: 'Playfair Display', serif;
+    position: relative;
+    /* Added fixed max-width for consistent rendering */
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  /* THEMES */
+  #marksheet.theme-royal .ms-header, #marksheet.theme-royal .ms-accent, #marksheet.theme-royal .ms-result-bg { background: linear-gradient(135deg, #1e3a8a, #1d4ed8); }
+  #marksheet.theme-royal .ms-border-color { color: #1e3a8a; }
+  #marksheet.theme-royal .ms-table th, #marksheet.theme-royal .border-strip { background: #1e3a8a; }
+
+  #marksheet.theme-emerald .ms-header, #marksheet.theme-emerald .ms-accent, #marksheet.theme-emerald .ms-result-bg { background: linear-gradient(135deg, #064e3b, #059669); }
+  #marksheet.theme-emerald .ms-border-color { color: #064e3b; }
+  #marksheet.theme-emerald .ms-table th, #marksheet.theme-emerald .border-strip { background: #064e3b; }
+
+  #marksheet.theme-crimson .ms-header, #marksheet.theme-crimson .ms-accent, #marksheet.theme-crimson .ms-result-bg { background: linear-gradient(135deg, #7f1d1d, #dc2626); }
+  #marksheet.theme-crimson .ms-border-color { color: #7f1d1d; }
+  #marksheet.theme-crimson .ms-table th, #marksheet.theme-crimson .border-strip { background: #7f1d1d; }
+
+  #marksheet.theme-purple .ms-header, #marksheet.theme-purple .ms-accent, #marksheet.theme-purple .ms-result-bg { background: linear-gradient(135deg, #4c1d95, #7c3aed); }
+  #marksheet.theme-purple .ms-border-color { color: #4c1d95; }
+  #marksheet.theme-purple .ms-table th, #marksheet.theme-purple .border-strip { background: #4c1d95; }
+
+  #marksheet.theme-gold .ms-header, #marksheet.theme-gold .ms-accent, #marksheet.theme-gold .ms-result-bg { background: linear-gradient(135deg, #78350f, #d97706); }
+  #marksheet.theme-gold .ms-border-color { color: #78350f; }
+  #marksheet.theme-gold .ms-table th, #marksheet.theme-gold .border-strip { background: #78350f; }
+
+  .border-strip { height: 8px; width: 100%; }
+
+  .ms-header {
+    padding: 24px 28px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    color: #fff;
+  }
+
+  .ms-institute-logo {
+    width: 70px; height: 70px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.4);
+  }
+
+  .ms-institute-logo img { width: 100%; height: 100%; object-fit: cover; }
+
+  .ms-institute-info { flex: 1; text-align: center; }
+
+  .ms-institute-name {
+    font-size: clamp(18px, 4vw, 26px);
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  .ms-institute-sub {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    opacity: 0.85;
+    margin-top: 4px;
+    letter-spacing: 1px;
+  }
+
+  .ms-title-bar {
+    background: rgba(255,255,255,0.15);
+    text-align: center;
+    padding: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    font-weight: 700;
+    border-top: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .ms-body { padding: 20px 24px; }
+
+  .ms-student-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  .ms-photo {
+    width: 90px;
+    height: 110px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    font-size: 30px;
+  }
+
+  .ms-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+  .ms-info-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 20px;
+  }
+
+  .ms-info-item { display: flex; flex-direction: column; }
+
+  .ms-info-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+
+  .ms-info-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #222;
+    border-bottom: 1px dotted #ccc;
+    padding-bottom: 2px;
+  }
+
+  /* MARKS TABLE */
+  .ms-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-family: 'Rajdhani', sans-serif;
+  }
+
+  .ms-table th {
+    color: #fff;
+    padding: 10px 12px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+
+  .ms-table td {
+    padding: 9px 12px;
+    border: 1px solid #e5e5e5;
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+  }
+
+  .ms-table tr:nth-child(even) td { background: #f9f9f9; }
+  .ms-table tr:hover td { background: #f0f0f0; }
+
+  .ms-table .sub-name { text-align: left; font-weight: 600; }
+
+  .grade-a { color: #16a34a; font-weight: 700; }
+  .grade-b { color: #2563eb; font-weight: 700; }
+  .grade-c { color: #ca8a04; font-weight: 700; }
+  .grade-d { color: #dc2626; font-weight: 700; }
+
+  /* RESULT SECTION */
+  .ms-result-section {
+    margin-top: 12px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .ms-result-bg {
+    border-radius: 10px;
+    padding: 14px 20px;
+    color: #fff;
+    flex: 1;
+    min-width: 140px;
+    text-align: center;
+  }
+
+  .ms-result-bg .res-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .ms-result-bg .res-val {
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+    margin: 6px 0 2px;
+  }
+
+  .ms-result-bg .res-sub {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    opacity: 0.7;
+  }
+
+  .ms-pass-fail {
+    border-radius: 10px;
+    padding: 14px 24px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+  }
+
+  .ms-pass-fail.pass { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
+  .ms-pass-fail.fail { background: #fee2e2; color: #dc2626; border: 2px solid #fca5a5; }
+
+  .ms-pass-fail .pf-sub {
+    font-size: 11px;
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 1px;
+    margin-top: 4px;
+    opacity: 0.7;
+  }
+
+  /* SIGNATURES */
+  .ms-signatures {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e5e5;
+  }
+
+  .ms-sig {
+    text-align: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    color: #666;
+  }
+
+  .ms-sig-line {
+    width: 120px;
+    height: 1px;
+    background: #999;
+    margin: 0 auto 4px;
+  }
+
+  /* WATERMARK */
+  .ms-watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-size: 80px;
+    font-weight: 900;
+    color: rgba(0,0,0,0.04);
+    pointer-events: none;
+    white-space: nowrap;
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 10px;
+    z-index: 0;
+  }
+
+  .ms-content { position: relative; z-index: 1; }
+
+  /* NOTICE */
+  .ms-footer-note {
+    background: #f9f9f9;
+    border-top: 1px solid #e5e5e5;
+    padding: 10px 24px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    color: #888;
+    text-align: center;
+    letter-spacing: 0.3px;
+  }
+
+  /* LOADING */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .loading-overlay.show { display: flex; }
+
+  .spinner {
+    width: 50px; height: 50px;
+    border: 3px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text { color: var(--gold); font-size: 16px; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--card);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* MOBILE RESPONSIVE */
+  @media(max-width: 500px) {
+    .ms-info-grid { grid-template-columns: 1fr; }
+    .ms-signatures { flex-direction: column; gap: 20px; align-items: center; }
+    .preview-controls { flex-direction: column; }
+    .btn { width: 100%; justify-content: center; }
+    .steps { font-size: 10px; }
+    .ms-watermark { font-size: 50px; }
+  }
+
+  .hint-text {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .pass-mark-note {
+    background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #86efac;
+    margin-top: 8px;
+  }
+</style>
 </head>
-<body class="bg-slate-100">
+<body>
 
-    <!-- Auth Modal -->
-    <div id="auth-modal" class="modal fixed inset-0 bg-gray-900 bg-opacity-60 z-[80] flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full">
-            <div id="auth-view-container" class="p-8 text-center">
-                 <h1 class="text-2xl font-extrabold tracking-wider text-gray-800">Drownford Academy</h1>
-                 <p class="text-gray-500 mt-2 mb-8">AI सीखने के भविष्य में आपका स्वागत है।</p>
-                 <button id="google-signin-btn" class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
-                    <svg class="w-6 h-6 mr-3" viewBox="0 0 48 48"><path fill="#4285F4" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#34A853" d="M6.306 14.691L12.16 19.319C12.823 16.633 14.994 14.691 17.657 13.576L11.8 8.958C9.642 10.743 7.68 12.535 6.306 14.691z"></path><path fill="#FBBC05" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-5.657-5.657C30.046 35.668 27.225 37 24 37c-3.204 0-6.036-1.35-8.058-3.456L10.32 28.864C13.438 34.022 18.373 37 24 37z" transform="translate(0 -1)"></path><path fill="#EA4335" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.16-4.082 5.571l5.657 5.657C40.072 35.127 44 29.836 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg>
-                    Sign in with Google
-                 </button>
-            </div>
-        </div>
+<div class="wrapper">
+
+<!-- HEADER -->
+<header>
+  <div class="logo-icon">📋</div>
+  <div>
+    <h1>Marksheet Generator</h1>
+    <p>Smart Teacher Tool — Fill karo, Download karo!</p>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- STEPS -->
+  <div class="steps">
+    <div class="step active" onclick="goStep(1)">
+      <span class="num">1</span>Institute Info
     </div>
+    <div class="step" onclick="goStep(2)">
+      <span class="num">2</span>Student Info
+    </div>
+    <div class="step" onclick="goStep(3)">
+      <span class="num">3</span>Marks & Subjects
+    </div>
+    <div class="step" onclick="goStep(4)">
+      <span class="num">4</span>Design & Preview
+    </div>
+  </div>
+
+  <!-- STEP 1: INSTITUTE -->
+  <div class="section visible" id="step1">
+    <div class="section-title"><span>🏫</span> Institute / School / Coaching Details</div>
+
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Institute / School / Coaching Name *</label>
+        <input type="text" id="instituteName" placeholder="e.g. Bindhyachal Academy" required />
+      </div>
+      <div class="form-group full">
+        <label>Address</label>
+        <input type="text" id="instituteAddress" placeholder="City, District, State" />
+      </div>
+      <div class="form-group">
+        <label>Phone / Mobile</label>
+        <input type="text" id="institutePhone" placeholder="+91 XXXXXXXXXX" />
+      </div>
+      <div class="form-group">
+        <label>Email (Optional)</label>
+        <input type="email" id="instituteEmail" placeholder="academy@email.com" />
+      </div>
+      <div class="form-group">
+        <label>Affiliated Board / University</label>
+        <input type="text" id="affiliatedBoard" placeholder="e.g. CBSE, UP Board, ICSE" />
+      </div>
+      <div class="form-group">
+        <label>Academic Year</label>
+        <input type="text" id="academicYear" placeholder="e.g. 2024-25" />
+      </div>
+      <div class="form-group full">
+        <label>Institute Logo (Optional)</label>
+        <div class="logo-upload-box" onclick="document.getElementById('logoInput').click()">
+          <img id="logoPreview" src="" style="display:none" alt="logo">
+          <span id="logoPlaceholder" style="color:var(--muted); font-size:13px;">📷 Click to upload Logo / Seal</span>
+        </div>
+        <input type="file" id="logoInput" accept="image/*" onchange="handleLogo(this)">
+        <div class="hint-text">PNG/JPG — transparent background best lagta hai</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="goStep(2)">Next: Student Info →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: STUDENT -->
+  <div class="section" id="step2">
+    <div class="section-title"><span>🎓</span> Student Details</div>
+
+    <div class="photo-upload">
+      <div>
+        <label style="display:block; margin-bottom:8px;">Student Photo</label>
+        <div class="photo-box" onclick="document.getElementById('photoInput').click()">
+          <img id="studentPhotoPreview" src="" style="display:none" alt="student">
+          <div id="photoPlaceholder">
+            <div class="upload-icon">👤</div>
+            <div class="upload-hint">Tap to upload photo</div>
+          </div>
+        </div>
+        <input type="file" id="photoInput" accept="image/*" onchange="handlePhoto(this)">
+      </div>
+
+      <div class="form-grid" style="flex:1; margin:0;">
+        <div class="form-group full">
+          <label>Student Full Name *</label>
+          <input type="text" id="studentName" placeholder="e.g. Rahul Kumar Sharma" required />
+        </div>
+        <div class="form-group">
+          <label>Father's Name</label>
+          <input type="text" id="fatherName" placeholder="Father ka naam" />
+        </div>
+        <div class="form-group">
+          <label>Mother's Name</label>
+          <input type="text" id="motherName" placeholder="Mother ka naam" />
+        </div>
+        <div class="form-group">
+          <label>Roll Number</label>
+          <input type="text" id="rollNo" placeholder="e.g. 2024001" />
+        </div>
+        <div class="form-group">
+          <label>Class / Batch</label>
+          <input type="text" id="className" placeholder="e.g. Class 10 / IIT Batch A" />
+        </div>
+        <div class="form-group">
+          <label>Exam / Test Name *</label>
+          <input type="text" id="examName" placeholder="e.g. Half Yearly Exam 2024" required />
+        </div>
+        <div class="form-group">
+          <label>Date of Birth</label>
+          <input type="date" id="dob" />
+        </div>
+        <div class="form-group">
+          <label>Issue Date</label>
+          <input type="date" id="issueDate" />
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goStep(1)">← Back</button>
+      <button class="btn btn-gold" onclick="goStep(3)">Next: Marks →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: MARKS -->
+  <div class="section" id="step3">
+    <div class="section-title"><span>📊</span> Subjects & Marks</div>
+
+    <div class="form-grid" style="margin-bottom:16px;">
+      <div class="form-group">
+        <label>Maximum Marks per Subject</label>
+        <input type="number" id="maxMarks" placeholder="100" value="100" min="1" onchange="updateMaxAll(this.value)" />
+      </div>
+      <div class="form-group">
+        <label>Pass Marks (%)</label>
+        <input type="number" id="passPct" placeholder="33" value="33" min="0" max="100" />
+      </div>
+    </div>
+
+    <div class="pass-mark-note">
+      💡 Grade: 90%+ = A+ | 75%+ = A | 60%+ = B | 45%+ = C | 33%+ = D | Below = F
+    </div>
+
+    <br>
+
+    <div class="table-container">
+      <table class="subjects-table" id="subjectsTable">
+        <thead>
+          <tr>
+            <th style="width:30%">Subject Name</th>
+            <th>Max Marks</th>
+            <th>Theory</th>
+            <th>Practical</th>
+            <th>Total</th>
+            <th>Grade</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="subjectsBody">
+        </tbody>
+      </table>
+    </div>
+
+    <button class="add-subject-btn" onclick="addSubject()">+ Add Subject</button>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goStep(2)">← Back</button>
+      <button class="btn btn-gold" onclick="goStep(4)">Next: Design & Preview →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: DESIGN & PREVIEW -->
+  <div class="section" id="step4">
+    <div class="section-title"><span>🎨</span> Choose Color Theme</div>
+
+    <div class="theme-grid">
+      <div class="theme-card selected" data-theme="royal" onclick="selectTheme('royal', this)">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #1e3a8a, #1d4ed8);">👑</div>
+        <div class="theme-label">Royal Blue</div>
+      </div>
+      <div class="theme-card" data-theme="emerald" onclick="selectTheme('emerald', this)">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #064e3b, #059669);">🌿</div>
+        <div class="theme-label">Emerald</div>
+      </div>
+      <div class="theme-card" data-theme="crimson" onclick="selectTheme('crimson', this)">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #7f1d1d, #dc2626);">🔴</div>
+        <div class="theme-label">Crimson</div>
+      </div>
+      <div class="theme-card" data-theme="purple" onclick="selectTheme('purple', this)">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #4c1d95, #7c3aed);">💜</div>
+        <div class="theme-label">Purple</div>
+      </div>
+      <div class="theme-card" data-theme="gold" onclick="selectTheme('gold', this)">
+        <div class="theme-preview" style="background: linear-gradient(135deg, #78350f, #d97706);">✨</div>
+        <div class="theme-label">Golden</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goStep(3)">← Back</button>
+      <button class="btn btn-gold" onclick="generateMarksheet()">🔍 Preview Marksheet</button>
+    </div>
+  </div>
+
+  <!-- PREVIEW SECTION -->
+  <div id="marksheet-preview">
+    <div class="preview-controls">
+      <span class="preview-label">✅ Marksheet Ready! Download karo ya print karo.</span>
+      <button class="btn btn-green" onclick="downloadPDF()">⬇ Download PDF</button>
+      <button class="btn btn-outline" onclick="printMarksheet()">🖨 Print</button>
+      <button class="btn btn-outline" onclick="editAgain()">✏ Edit</button>
+    </div>
+
+    <!-- THE MARKSHEET -->
+    <div id="marksheet" class="theme-royal">
+      <div class="ms-watermark" id="msWatermark">MARKSHEET</div>
+      <div class="ms-content">
+        <div class="border-strip"></div>
+
+        <div class="ms-header">
+          <div class="ms-institute-logo" id="msLogo">🏫</div>
+          <div class="ms-institute-info">
+            <div class="ms-institute-name" id="msInstituteName">Institute Name</div>
+            <div class="ms-institute-sub" id="msInstituteAddr"></div>
+            <div class="ms-institute-sub" id="msInstituteContact"></div>
+          </div>
+          <div class="ms-institute-logo" id="msLogoRight">🏫</div>
+        </div>
+
+        <div class="ms-title-bar" id="msTitleBar">MARKSHEET / PROGRESS REPORT</div>
+
+        <div class="ms-body">
+          <div class="ms-student-row">
+            <div class="ms-photo" id="msPhoto">👤</div>
+            <div class="ms-info-grid">
+              <div class="ms-info-item">
+                <div class="ms-info-label">Student Name</div>
+                <div class="ms-info-value" id="msStudentName">—</div>
+              </div>
+              <div class="ms-info-item">
+                <div class="ms-info-label">Roll No.</div>
+                <div class="ms-info-value" id="msRollNo">—</div>
+              </div>
+              <div class="ms-info-item">
+                <div class="ms-info-label">Father's Name</div>
+                <div class="ms-info-value" id="msFather">—</div>
+              </div>
+              <div class="ms-info-item">
+                <div class="ms-info-label">Mother's Name</div>
+                <div class="ms-info-value" id="msMother">—</div>
+              </div>
+              <div class="ms-info-item">
+                <div class="ms-info-label">Class / Batch</div>
+                <div class="ms-info-value" id="msClass">—</div>
+              </div>
+              <div class="ms-info-item">
+                <div class="ms-info-label">Date of Birth</div>
+                <div class="ms-info-value" id="msDob">—</div>
+              </div>
+              <div class="ms-info-item">
+                <div class="ms-info-label">Exam Name</div>
+                <div class="ms-info-value" id="msExam">—</div>
+              </div>
+              <div class="ms-info-item">
+                <div class="ms-info-label">Academic Year</div>
+                <div class="ms-info-value" id="msAcadYear">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MARKS TABLE -->
+          <table class="ms-table">
+            <thead>
+              <tr>
+                <th style="text-align:left; border-radius:4px 0 0 4px;">Subject</th>
+                <th>Max Marks</th>
+                <th>Theory</th>
+                <th>Practical</th>
+                <th>Total</th>
+                <th style="border-radius:0 4px 4px 0;">Grade</th>
+              </tr>
+            </thead>
+            <tbody id="msSubjectsBody"></tbody>
+            <tfoot>
+              <tr style="font-weight:700; background:#f0f0f0;">
+                <td style="text-align:left; font-weight:700;">TOTAL</td>
+                <td id="msTotalMax">—</td>
+                <td id="msTotalTheory">—</td>
+                <td id="msTotalPractical">—</td>
+                <td id="msGrandTotal">—</td>
+                <td id="msOverallGrade">—</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <!-- RESULT -->
+          <div class="ms-result-section">
+            <div class="ms-result-bg" id="msResultBox1">
+              <div class="res-label">Total Marks</div>
+              <div class="res-val" id="resTotalMarks">—</div>
+              <div class="res-sub" id="resTotalSub">out of —</div>
+            </div>
+            <div class="ms-result-bg" id="msResultBox2">
+              <div class="res-label">Percentage</div>
+              <div class="res-val" id="resPercentage">—%</div>
+              <div class="res-sub">Overall</div>
+            </div>
+            <div class="ms-result-bg" id="msResultBox3">
+              <div class="res-label">Grade</div>
+              <div class="res-val" id="resFinalGrade">—</div>
+              <div class="res-sub" id="resGradeDesc">—</div>
+            </div>
+            <div class="ms-pass-fail" id="msPassFail">
+              <div>PASS</div>
+              <div class="pf-sub">RESULT</div>
+            </div>
+          </div>
+
+          <!-- SIGNATURES -->
+          <div class="ms-signatures">
+            <div class="ms-sig">
+              <div class="ms-sig-line"></div>
+              Student's Signature
+            </div>
+            <div class="ms-sig">
+              <div style="font-style:italic; color:#999; font-size:11px; margin-bottom:4px;" id="msIssueDate">Issue Date: —</div>
+              <div class="ms-sig-line"></div>
+              Class Teacher
+            </div>
+            <div class="ms-sig">
+              <div class="ms-sig-line"></div>
+              Principal / Director
+            </div>
+          </div>
+        </div>
+
+        <div class="ms-footer-note" id="msFooter">
+          This is a computer generated marksheet. | <span id="msInstituteNameFooter"></span>
+        </div>
+
+        <div class="border-strip"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end main -->
+</div><!-- end wrapper -->
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">PDF generate ho raha hai...</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ======================== STATE ========================
+let currentStep = 1;
+let selectedTheme = 'royal';
+let studentPhotoData = null;
+let logoData = null;
+
+// ======================== STEPS ========================
+function goStep(n) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  document.getElementById('marksheet-preview').classList.remove('visible');
+  document.getElementById('step' + n).classList.add('visible');
+  document.querySelectorAll('.step').forEach((s, i) => {
+    s.classList.toggle('active', i + 1 === n);
+  });
+  currentStep = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ======================== PHOTO UPLOAD ========================
+function handlePhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    studentPhotoData = e.target.result;
+    const img = document.getElementById('studentPhotoPreview');
+    img.src = studentPhotoData;
+    img.style.display = 'block';
+    document.getElementById('photoPlaceholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleLogo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    logoData = e.target.result;
+    const img = document.getElementById('logoPreview');
+    img.src = logoData;
+    img.style.display = 'block';
+    document.getElementById('logoPlaceholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ======================== SUBJECTS ========================
+const defaultSubjects = ['Hindi', 'English', 'Mathematics', 'Science', 'Social Science'];
+
+function getGrade(pct) {
+  if (pct >= 90) return { g: 'A+', cls: 'grade-a', desc: 'Outstanding' };
+  if (pct >= 75) return { g: 'A', cls: 'grade-a', desc: 'Excellent' };
+  if (pct >= 60) return { g: 'B', cls: 'grade-b', desc: 'Good' };
+  if (pct >= 45) return { g: 'C', cls: 'grade-c', desc: 'Average' };
+  if (pct >= 33) return { g: 'D', cls: 'grade-c', desc: 'Satisfactory' };
+  return { g: 'F', cls: 'grade-d', desc: 'Fail' };
+}
+
+function addSubject(name = '', max = '', theory = '', practical = '') {
+  const tbody = document.getElementById('subjectsBody');
+  const maxVal = document.getElementById('maxMarks').value || 100;
+  const row = document.createElement('tr');
+  const rid = Date.now() + Math.floor(Math.random() * 1000);
+  row.id = 'row_' + rid;
+  row.innerHTML = `
+    <td><input type="text" placeholder="Subject name" value="${name}" onchange="calcRow('${rid}')" /></td>
+    <td><input type="number" min="0" placeholder="${maxVal}" value="${max || maxVal}" style="width:70px" onchange="calcRow('${rid}')" id="max_${rid}" /></td>
+    <td><input type="number" min="0" placeholder="0" value="${theory}" style="width:70px" onchange="calcRow('${rid}')" id="th_${rid}" /></td>
+    <td><input type="number" min="0" placeholder="0" value="${practical}" style="width:70px" onchange="calcRow('${rid}')" id="pr_${rid}" /></td>
+    <td id="total_${rid}" style="font-weight:700;">—</td>
+    <td id="grade_${rid}">—</td>
+    <td><button class="del-btn" onclick="delSubject('row_${rid}')">🗑</button></td>
+  `;
+  tbody.appendChild(row);
+  if (theory || practical) calcRow(rid);
+}
+
+function calcRow(rid) {
+  const max = parseFloat(document.getElementById('max_' + rid)?.value) || 0;
+  const th = parseFloat(document.getElementById('th_' + rid)?.value) || 0;
+  const pr = parseFloat(document.getElementById('pr_' + rid)?.value) || 0;
+  const total = th + pr;
+  const pct = max > 0 ? (total / max) * 100 : 0; // Fix Division by Zero
+  const grade = getGrade(pct);
+  
+  const totalCell = document.getElementById('total_' + rid);
+  const gradeCell = document.getElementById('grade_' + rid);
+  
+  if (totalCell) totalCell.textContent = total;
+  if (gradeCell) gradeCell.innerHTML = `<span class="${grade.cls}">${grade.g}</span>`;
+}
+
+function delSubject(rowId) {
+  const row = document.getElementById(rowId);
+  if (row) row.remove();
+}
+
+function updateMaxAll(val) {
+  document.querySelectorAll('#subjectsBody input[type=number]').forEach(inp => {
+    if (inp.id && inp.id.startsWith('max_')) inp.value = val;
+  });
+  // Recalculate all rows
+  document.querySelectorAll('#subjectsBody tr').forEach(row => {
+    const rid = row.id.split('_')[1];
+    if(rid) calcRow(rid);
+  });
+}
+
+// Init default subjects
+window.addEventListener('DOMContentLoaded', () => {
+  defaultSubjects.forEach(s => addSubject(s));
+  document.getElementById('issueDate').value = new Date().toISOString().split('T')[0];
+});
+
+// ======================== THEME ========================
+function selectTheme(theme, card) {
+  selectedTheme = theme;
+  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+}
+
+// ======================== GENERATE ========================
+function generateMarksheet() {
+  // Collect data
+  const instituteName = document.getElementById('instituteName').value || 'Institute Name';
+  const instituteAddr = document.getElementById('instituteAddress').value || '';
+  const institutePhone = document.getElementById('institutePhone').value || '';
+  const instituteEmail = document.getElementById('instituteEmail').value || '';
+  const affiliatedBoard = document.getElementById('affiliatedBoard').value || '';
+  const academicYear = document.getElementById('academicYear').value || '';
+
+  const studentName = document.getElementById('studentName').value || 'Student Name';
+  const fatherName = document.getElementById('fatherName').value || '—';
+  const motherName = document.getElementById('motherName').value || '—';
+  const rollNo = document.getElementById('rollNo').value || '—';
+  const className = document.getElementById('className').value || '—';
+  const examName = document.getElementById('examName').value || 'Examination';
+  const dob = document.getElementById('dob').value;
+  let issueDate = document.getElementById('issueDate').value;
+  
+  if(!issueDate) {
+      issueDate = new Date().toISOString().split('T')[0];
+  }
+
+  const passPct = parseFloat(document.getElementById('passPct').value) || 33;
+
+  // Set theme
+  const ms = document.getElementById('marksheet');
+  ms.className = 'theme-' + selectedTheme;
+
+  // Institute
+  document.getElementById('msInstituteName').textContent = instituteName;
+  document.getElementById('msInstituteAddr').textContent = [instituteAddr, affiliatedBoard].filter(Boolean).join(' | ');
+  document.getElementById('msInstituteContact').textContent = [institutePhone, instituteEmail].filter(Boolean).join(' | ');
+  document.getElementById('msInstituteNameFooter').textContent = instituteName;
+  document.getElementById('msWatermark').textContent = instituteName;
+
+  // Logo
+  const logoLeft = document.getElementById('msLogo');
+  const logoRight = document.getElementById('msLogoRight');
+  if (logoData) {
+    logoLeft.innerHTML = `<img src="${logoData}" alt="logo">`;
+    logoRight.innerHTML = `<img src="${logoData}" alt="logo">`;
+  } else {
+    logoLeft.innerHTML = '🏫';
+    logoRight.innerHTML = '🏫';
+  }
+
+  // Title bar
+  document.getElementById('msTitleBar').textContent = examName.toUpperCase() + ' — MARKSHEET';
+
+  // Student
+  document.getElementById('msStudentName').textContent = studentName;
+  document.getElementById('msRollNo').textContent = rollNo;
+  document.getElementById('msFather').textContent = fatherName;
+  document.getElementById('msMother').textContent = motherName;
+  document.getElementById('msClass').textContent = className;
+  document.getElementById('msDob').textContent = dob ? formatDate(dob) : '—';
+  document.getElementById('msExam').textContent = examName;
+  document.getElementById('msAcadYear').textContent = academicYear || '—';
+  document.getElementById('msIssueDate').textContent = 'Issue Date: ' + formatDate(issueDate);
+
+  // Photo
+  const msPhoto = document.getElementById('msPhoto');
+  if (studentPhotoData) {
+    msPhoto.innerHTML = `<img src="${studentPhotoData}" alt="student photo">`;
+  } else {
+    msPhoto.innerHTML = '👤';
+  }
+
+  // Collect subjects
+  const rows = document.querySelectorAll('#subjectsBody tr');
+  let totalMax = 0, totalTheory = 0, totalPractical = 0, grandTotal = 0;
+  let allPass = true;
+  const msBody = document.getElementById('msSubjectsBody');
+  msBody.innerHTML = '';
+
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    if (!inputs[0] || !inputs[0].value.trim()) return;
     
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4 hidden opacity-0">
-        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h3 class="text-xl font-bold">API Key Settings</h3>
-                <button id="settings-modal-close" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
-            </div>
-            <div class="p-6">
-                <p class="text-gray-600 mb-4">AI features का उपयोग करने के लिए, कृपया अपनी Gemini API key डालें। आपकी key केवल आपके browser में save होगी।</p>
-                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 hover:underline mb-4 block">यहाँ से अपनी free API key प्राप्त करें।</a>
-                <input id="api-key-input" type="password" placeholder=" अपनी API key यहाँ पेस्ट करें" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
-                <button id="save-api-key-btn" class="w-full mt-4 bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">Save Key</button>
-            </div>
-        </div>
-    </div>
+    const subName = inputs[0].value;
+    const max = parseFloat(inputs[1].value) || 0;
+    const theory = parseFloat(inputs[2].value) || 0;
+    const practical = parseFloat(inputs[3].value) || 0;
+    const total = theory + practical;
+    const pct = max > 0 ? (total / max) * 100 : 0;
+    const grade = getGrade(pct);
+    const passMarks = (passPct / 100) * max;
 
-    <!-- Voice Assistant Modal -->
-    <div id="voice-assistant-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4 hidden opacity-0">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full text-center p-8 relative">
-             <button id="voice-assistant-close-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-            <div id="voice-assistant-indicator" class="w-24 h-24 bg-indigo-500 rounded-full mx-auto mb-6 flex items-center justify-center transition-colors duration-300">
-                 <svg id="mic-icon" class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
-            </div>
-            <h2 id="voice-assistant-status" class="text-2xl font-bold text-gray-800">Listening...</h2>
-            <p id="voice-assistant-transcript" class="text-gray-600 mt-4 min-h-[2.5em]"></p>
-        </div>
-    </div>
+    if (total < passMarks) allPass = false;
 
-    <!-- Main App Structure (hidden by default) -->
-    <div id="app-container" class="hidden">
-        <div class="flex h-screen bg-white">
-            <!-- Sidebar -->
-            <aside id="sidebar" class="sidebar w-64 bg-gray-900 text-white flex-col fixed h-full z-40 transform -translate-x-full md:translate-x-0">
-                <div class="px-6 py-5 border-b border-gray-700 flex items-center space-x-3">
-                    <span class="text-3xl">🎓</span>
-                    <h1 class="text-xl font-extrabold tracking-wider">Drownford Academy</h1>
-                </div>
-                <nav class="flex-1 px-4 py-4 space-y-2">
-                    <a href="#dashboard" class="nav-link flex items-center px-4 py-2.5 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors">
-                        <span class="mr-3">🏠</span> Dashboard
-                    </a>
-                    <a href="#roadmap" class="nav-link flex items-center px-4 py-2.5 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors">
-                        <span class="mr-3">🚀</span> AI Roadmap
-                    </a>
-                    <a href="#notebook" class="nav-link flex items-center px-4 py-2.5 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors">
-                        <span class="mr-3">📖</span> Notebook
-                    </a>
-                    <a href="#progress" class="nav-link flex items-center px-4 py-2.5 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors">
-                        <span class="mr-3">📊</span> Meri Progress
-                    </a>
-                    <a href="#time" class="nav-link flex items-center px-4 py-2.5 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors">
-                        <span class="mr-3">⏰</span> Time Management
-                    </a>
-                    <a href="#chat" class="nav-link flex items-center px-4 py-2.5 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors">
-                        <span class="mr-3">🤖</span> AI se Puchein
-                    </a>
-                </nav>
-                <div class="px-6 py-4 border-t border-gray-700">
-                    <button id="logout-btn" class="w-full flex items-center justify-center px-4 py-2.5 text-gray-300 bg-red-800/50 hover:bg-red-700/80 rounded-lg transition-colors">
-                        <span class="mr-3">🚪</span> Logout
-                    </button>
-                </div>
-            </aside>
+    totalMax += max;
+    totalTheory += theory;
+    totalPractical += practical;
+    grandTotal += total;
 
-            <!-- Main Content -->
-            <div id="main-content" class="main-content flex-1 flex flex-col h-screen md:ml-64">
-                 <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-30 flex items-center justify-between px-6 py-4">
-                    <button id="menu-toggle" class="text-gray-600 md:hidden">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                    </button>
-                    <h2 id="view-title" class="text-2xl font-bold text-gray-800">Dashboard</h2>
-                    <div class="flex items-center space-x-4">
-                        <span id="username-display" class="font-semibold text-gray-600"></span>
-                        <button id="voice-assistant-btn" class="text-gray-600 hover:text-indigo-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
-                        </button>
-                        <button id="settings-btn" class="text-gray-600 hover:text-indigo-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        </button>
-                    </div>
-                </header>
-                
-                <main class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 bg-gray-50">
-                    <!-- Views will be injected here -->
-                    <div id="dashboard-view" class="view"></div>
-                    <div id="roadmap-view" class="view hidden"></div>
-                    <div id="notebook-view" class="view hidden"></div>
-                    <div id="progress-view" class="view hidden"></div>
-                    <div id="time-view" class="view hidden"></div>
-                    <div id="chat-view" class="view hidden"></div>
-                </main>
-            </div>
-        </div>
-    </div>
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="sub-name">${subName}</td>
+      <td>${max}</td>
+      <td>${theory}</td>
+      <td>${practical}</td>
+      <td><strong>${total}</strong></td>
+      <td><span class="${grade.cls}">${grade.g}</span></td>
+    `;
+    msBody.appendChild(tr);
+  });
+
+  // Totals
+  document.getElementById('msTotalMax').textContent = totalMax;
+  document.getElementById('msTotalTheory').textContent = totalTheory;
+  document.getElementById('msTotalPractical').textContent = totalPractical;
+  document.getElementById('msGrandTotal').textContent = grandTotal;
+
+  const overallPct = totalMax > 0 ? (grandTotal / totalMax) * 100 : 0;
+  const overallGrade = getGrade(overallPct);
+  document.getElementById('msOverallGrade').innerHTML = `<span class="${overallGrade.cls}">${overallGrade.g}</span>`;
+
+  // Result boxes
+  document.getElementById('resTotalMarks').textContent = grandTotal;
+  document.getElementById('resTotalSub').textContent = 'out of ' + totalMax;
+  document.getElementById('resPercentage').textContent = overallPct.toFixed(1) + '%';
+  document.getElementById('resFinalGrade').textContent = overallGrade.g;
+  document.getElementById('resGradeDesc').textContent = overallGrade.desc;
+
+  // Pass/Fail
+  const pfBox = document.getElementById('msPassFail');
+  const passRequired = (passPct / 100) * totalMax;
+  const passed = allPass && grandTotal >= passRequired;
+  pfBox.className = 'ms-pass-fail ' + (passed ? 'pass' : 'fail');
+  pfBox.innerHTML = `<div>${passed ? 'PASS' : 'FAIL'}</div><div class="pf-sub">RESULT</div>`;
+
+  // Show preview
+  document.getElementById('marksheet-preview').classList.add('visible');
+  document.getElementById('step4').classList.remove('visible');
+
+  setTimeout(() => {
+    document.getElementById('marksheet-preview').scrollIntoView({ behavior: 'smooth' });
+  }, 100);
+
+  showToast('✅ Marksheet ready hai!');
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+// ======================== PDF ========================
+async function downloadPDF() {
+  const overlay = document.getElementById('loadingOverlay');
+  overlay.classList.add('show');
+
+  try {
+    const el = document.getElementById('marksheet');
+    const canvas = await html2canvas(el, {
+      scale: 2.5,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false
+    });
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
     
-    <!-- Gemini API Response Modal -->
-    <div id="gemini-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4 hidden opacity-0">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h3 id="gemini-modal-title" class="text-xl font-bold"></h3>
-                <button id="gemini-modal-close" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
-            </div>
-            <div id="gemini-modal-content" class="p-6 overflow-y-auto" style="white-space: pre-wrap;"></div>
-        </div>
-    </div>
-    
-    <!-- Loading Indicator -->
-    <div id="loading-indicator" class="fixed inset-0 bg-black bg-opacity-25 z-[70] flex items-center justify-center hidden">
-        <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24"></div>
-    </div>
+    // Fixed PDF Distorting Issue
+    const imgW = pageW - 10; 
+    let imgH = (canvas.height * imgW) / canvas.width;
+    let finalW = imgW;
+    let finalH = imgH;
 
-    <script type="module">
-        // Firebase Imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    // If marksheet height is greater than A4 page height, scale it down proportionally
+    if (imgH > pageH - 10) {
+        finalH = pageH - 10;
+        finalW = (canvas.width * finalH) / canvas.height;
+    }
 
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyB7h0K454CFmVeXXoPcbHlvFF-azb1onVk",
-            authDomain: "drownford-academy.firebaseapp.com",
-            projectId: "drownford-academy",
-            storageBucket: "drownford-academy.appspot.com",
-            messagingSenderId: "722393600482",
-            appId: "1:722393600482:web:7b61df9c3e0125e76629bb"
-        };
-        
-        // --- ZAROORI NIRDESH: Isse live karne se pehle yeh 2 kadam poore karein ---
-        //
-        // 1. FIREBASE AUTHENTICATION MEIN DOMAIN AUTHORIZE KAREIN:
-        //    - Apne Firebase project mein jaayein -> Authentication -> Settings -> Authorized domains.
-        //    - "Add domain" par click karein aur apni GitHub Pages ka domain daalein (jaise: <your-username>.github.io).
-        //
-        // 2. FIRESTORE SECURITY RULES SET KAREIN:
-        //    - Apne Firebase project mein jaayein -> Firestore Database -> Rules.
-        //    - Neeche diye gaye rules ko copy karke paste karein aur "Publish" par click karein:
-        //
-        //    rules_version = '2';
-        //    service cloud.firestore {
-        //      match /databases/{database}/documents {
-        //        match /users/{userId} {
-        //          allow read, write: if request.auth != null && request.auth.uid == userId;
-        //        }
-        //      }
-        //    }
-        //
-        // --- YEH NIRDESH POORE KARNE KE BAAD HI APP SAHI SE KAAM KAREGA ---
+    const xOffset = (pageW - finalW) / 2;
+    const yOffset = (pageH - finalH) / 2; // Centers it vertically if small
 
-        let app, auth, db, provider;
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            provider = new GoogleAuthProvider();
-        } catch (error) {
-            console.error("Firebase initialization failed:", error);
-            alert("Firebase configuration mein galti hai. कृपया console check karein.");
-        }
+    pdf.addImage(imgData, 'JPEG', xOffset, yOffset, finalW, finalH);
 
+    const studentName = document.getElementById('studentName').value || 'Student';
+    pdf.save(`Marksheet_${studentName.replace(/\s+/g, '_')}.pdf`);
 
-        document.addEventListener('DOMContentLoaded', function () {
-            // --- App State and Data ---
-            const roadmapData = [
-                { id: 'charan-1', title: 'बुनियाद मज़बूत करें', duration: '3-4 महीने', topics: [
-                    { id: 'math', title: 'गणित (Mathematics)', items: ['Linear Algebra', 'Calculus', 'Probability & Statistics'] },
-                    { id: 'programming', title: 'प्रोग्रामिंग (Programming)', items: ['Python (Must Have)', 'Libraries: NumPy, Pandas, Matplotlib'] },
-                    { id: 'tools', title: 'ज़रूरी टूल्स (Essential Tools)', items: ['Jupyter Notebooks / Google Colab', 'Git & GitHub', 'SQL'] }
-                ]},
-                { id: 'charan-2', title: 'Data Science और Machine Learning', duration: '4-6 महीने', topics: [
-                    { id: 'ds-process', title: 'Data Science प्रक्रिया', items: ['Data Collection', 'Data Cleaning & Preprocessing', 'Exploratory Data Analysis (EDA)'] },
-                    { id: 'ml-core', title: 'Machine Learning के सिद्धांत', items: ['Supervised Learning', 'Unsupervised Learning'] },
-                    { id: 'model-building', title: 'मॉडल बनाना और सुधारना', items: ['Feature Engineering', 'Model Evaluation Metrics', 'Hyperparameter Tuning'] }
-                ]},
-                { id: 'charan-3', title: 'Deep Learning में गहराई', duration: '4-6 महीने', topics: [
-                    { id: 'nn-basics', title: 'Neural Networks की मूल बातें', items: ['Artificial Neural Networks (ANN)', 'Activation Functions, Backpropagation'] },
-                    { id: 'dl-frameworks', title: 'Deep Learning Frameworks', items: ['TensorFlow या PyTorch'] },
-                    { id: 'advanced-arch', title: 'एडवांस्ड आर्किटेक्चर', items: ['CNNs', 'RNNs & LSTMs', 'Transformers'] }
-                ]},
-                { id: 'charan-4', title: 'प्रोजेक्ट्स और प्रैक्टिकल अनुभव', duration: 'हमेशा जारी', topics: [
-                    { id: 'projects', title: 'प्रोजेक्ट्स बनाएँ (Build Projects)', items: ['छोटे प्रोजेक्ट से शुरू करें', 'बड़े प्रोजेक्ट्स पर काम करें', 'GitHub पर पोर्टफोलियो बनाएँ'] },
-                    { id: 'competitions', title: 'प्रतियोगिताओं में भाग लें', items: ['Kaggle पर प्रैक्टिस करें', 'वास्तविक डेटासेट पर काम करें'] }
-                ]},
-                { id: 'charan-5', title: 'विशेषज्ञता और MLOps', duration: 'हमेशा जारी', topics: [
-                    { id: 'specialization', title: 'किसी एक क्षेत्र में विशेषज्ञता', items: ['Computer Vision', 'Natural Language Processing (NLP)', 'Reinforcement Learning'] },
-                    { id: 'mlops', title: 'MLOps', items: ['Model Deployment', 'Containerization (Docker)', 'Cloud Platforms (AWS, GCP)'] }
-                ]}
-            ];
-            let currentUser = null;
+    showToast('✅ PDF Downloaded!');
+  } catch (e) {
+    showToast('❌ Error: ' + e.message);
+  } finally {
+    overlay.classList.remove('show');
+  }
+}
 
-            // --- UI Element References ---
-            const authModal = document.getElementById('auth-modal');
-            const appContainer = document.getElementById('app-container');
-            const views = document.querySelectorAll('.view');
-            const navLinks = document.querySelectorAll('.nav-link');
-            const viewTitle = document.getElementById('view-title');
-            const usernameDisplay = document.getElementById('username-display');
-            const logoutBtn = document.getElementById('logout-btn');
-            const menuToggle = document.getElementById('menu-toggle');
-            const sidebar = document.getElementById('sidebar');
-            const settingsModal = document.getElementById('settings-modal');
+function printMarksheet() {
+  const content = document.getElementById('marksheet').outerHTML;
+  const win = window.open('', '_blank');
+  win.document.write(`
+    <html><head><title>Print Marksheet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      body { margin: 0; padding: 20px; background: #fff; display: flex; justify-content: center; }
+      ${document.querySelector('style').innerHTML}
+      @media print { 
+          body { padding: 0; } 
+          #marksheet { box-shadow: none; max-width: 100%; } 
+      }
+    </style>
+    </head><body>${content}
+    <script>
+      // Timeout is used to ensure images/fonts render before printing
+      setTimeout(() => {
+          window.print();
+          window.close();
+      }, 500);
+    <\/script>
+    </body></html>
+  `);
+  win.document.close();
+}
 
-            // --- AUTHENTICATION ---
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    currentUser = user;
-                    initializeApp();
-                } else {
-                    currentUser = null;
-                    authModal.classList.remove('hidden');
-                    appContainer.classList.add('hidden');
-                }
-            });
+function editAgain() {
+  document.getElementById('marksheet-preview').classList.remove('visible');
+  goStep(4);
+}
 
-            function handleGoogleSignIn() {
-                signInWithPopup(auth, provider)
-                    .catch((error) => {
-                        console.error("Authentication Error:", error);
-                        if (error.code === 'auth/unauthorized-domain') {
-                            alert("Login Error: Yeh domain authorized nahi hai.\n\nKripya Firebase project settings mein jaakar is domain ko authorize karein. Zaroori nirdesh code ke andar diye gaye hain.");
-                        } else {
-                            alert("Login failed. Please try again. Error: " + error.message);
-                        }
-                    });
-            }
-
-            function handleLogout() {
-                signOut(auth);
-            }
-            document.getElementById('google-signin-btn').addEventListener('click', handleGoogleSignIn);
-            logoutBtn.addEventListener('click', handleLogout);
-
-            // --- VIEW RENDERING ---
-            function renderDashboardView() {
-                const container = document.getElementById('dashboard-view');
-                const overallProgress = calculateOverallProgress();
-                container.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-                            <h3 class="font-bold text-lg text-gray-500 mb-2">Overall Progress</h3>
-                            <p class="text-5xl font-extrabold text-indigo-600">${overallProgress.toFixed(0)}%</p>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-4">
-                                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: ${overallProgress}%"></div>
-                            </div>
-                        </div>
-                         <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-                            <h3 class="font-bold text-lg text-gray-500 mb-2">Topics Completed</h3>
-                            <p class="text-5xl font-extrabold text-green-600">${getCompletedTopicCount()}</p>
-                             <p class="text-gray-500 mt-4">out of ${roadmapData.flatMap(s => s.topics).length} total topics</p>
-                        </div>
-                         <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-                            <h3 class="font-bold text-lg text-gray-500 mb-2">Quick Actions</h3>
-                            <div class="mt-4 space-y-2">
-                                <a href="#roadmap" class="nav-link-action block text-center w-full bg-blue-100 text-blue-800 p-3 rounded-lg font-semibold hover:bg-blue-200 transition-colors">Continue Learning 🚀</a>
-                                <a href="#notebook" class="nav-link-action block text-center w-full bg-yellow-100 text-yellow-800 p-3 rounded-lg font-semibold hover:bg-yellow-200 transition-colors">View My Notes 📖</a>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                document.querySelectorAll('.nav-link-action').forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        window.location.hash = new URL(link.href).hash;
-                    });
-                });
-            }
-            
-            function renderRoadmapView() {
-                const container = document.getElementById('roadmap-view');
-                container.innerHTML = roadmapData.map(stage => `
-                    <section id="${stage.id}" class="mb-12">
-                        <div class="mb-8">
-                            <span class="bg-indigo-100 text-indigo-800 text-sm font-medium mr-2 px-3 py-1 rounded-full">${stage.duration}</span>
-                            <h3 class="text-3xl font-bold text-gray-800 mt-2">${stage.title}</h3>
-                        </div>
-                        <div class="space-y-4">
-                            ${stage.topics.map(topic => `
-                                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-                                    <button class="accordion-button w-full text-left p-5 flex justify-between items-center hover:bg-gray-50 transition-colors">
-                                        <div class="flex items-center">
-                                            <input type="checkbox" class="progress-checkbox h-5 w-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300 mr-4" data-topic-id="${topic.id}">
-                                            <span class="text-lg font-semibold text-gray-800">${topic.title}</span>
-                                        </div>
-                                        <span class="arrow text-indigo-500 text-2xl font-bold transform transition-transform">›</span>
-                                    </button>
-                                    <div class="accordion-content bg-gray-50/50 hidden">
-                                        <ul class="px-5 pt-2 pb-4 list-disc list-inside text-gray-700 space-y-2 ml-8">
-                                            ${topic.items.map(item => `<li>${item}</li>`).join('')}
-                                        </ul>
-                                        <div class="notes-section border-t border-gray-200 p-5">
-                                            <div class="flex flex-wrap gap-2 mb-4">
-                                                <button class="gemini-explain-btn text-sm bg-purple-100 text-purple-800 px-3 py-1 rounded-full hover:bg-purple-200 transition-colors" data-title="${topic.title}">✨ इससे समझाओ</button>
-                                                <button class="gemini-analogy-btn text-sm bg-teal-100 text-teal-800 px-3 py-1 rounded-full hover:bg-teal-200 transition-colors" data-title="${topic.title}">✨ Analogy दो</button>
-                                                <button class="gemini-question-btn text-sm bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full hover:bg-yellow-200 transition-colors" data-title="${topic.title}">✨ Practice सवाल</button>
-                                                <button class="gemini-project-btn text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full hover:bg-green-200 transition-colors" data-title="${topic.title}">✨ Project Ideas</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </section>
-                `).join('');
-                addAccordionListeners();
-                addGeminiButtonListeners();
-                addProgressCheckboxListeners();
-                updateProgressCheckboxes();
-            }
-
-            function renderProgressView() {
-                const container = document.getElementById('progress-view');
-                const overallProgress = calculateOverallProgress();
-                container.innerHTML = `
-                    <div class="bg-white p-8 rounded-2xl shadow-lg">
-                        <h2 class="text-3xl font-extrabold text-gray-900 mb-2">आपकी सीखने की प्रगति</h2>
-                        <p class="text-gray-600 mb-8">अपनी प्रगति को ट्रैक करें और प्रेरित रहें।</p>
-                        
-                        <div class="mb-10">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="font-bold text-gray-700">कुल प्रगति</span>
-                                <span class="font-bold text-indigo-600">${overallProgress.toFixed(0)}%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-4">
-                                <div class="progress-bar-fill bg-indigo-600 h-4 rounded-full" style="width: ${overallProgress}%;"></div>
-                            </div>
-                        </div>
-
-                        <div class="space-y-6">
-                        ${roadmapData.map(stage => {
-                            const stageProgress = calculateStageProgress(stage.id);
-                            return `
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="font-semibold text-gray-600">${stage.title}</span>
-                                    <span class="text-sm font-medium text-gray-500">${stageProgress.toFixed(0)}%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                    <div class="progress-bar-fill bg-green-500 h-2.5 rounded-full" style="width: ${stageProgress}%;"></div>
-                                </div>
-                            </div>
-                            `
-                        }).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            async function renderNotebookView() {
-                const container = document.getElementById('notebook-view');
-                let tocHTML = '<div class="w-full lg:w-1/3 p-4"><h3 class="text-2xl font-bold text-gray-800 mb-4">Table of Contents</h3><ul class="space-y-2">';
-                let notesHTML = '<div class="w-full lg:w-2/3 p-4 space-y-8">';
-                
-                for (const stage of roadmapData) {
-                    notesHTML += `<h4 class="text-xl font-bold text-indigo-800 mt-6 border-b pb-2">${stage.title}</h4>`;
-                    for (const topic of stage.topics) {
-                        const noteContent = await getNote(topic.id) || '';
-                        tocHTML += `<li><a href="#note-${topic.id}" class="text-indigo-600 hover:underline">${topic.title}</a></li>`;
-                        notesHTML += `
-                            <div id="note-${topic.id}" class="note-entry pt-4">
-                                <h3 class="text-lg font-bold text-gray-700 mb-3">${topic.title}</h3>
-                                <textarea class="note-textarea w-full h-36 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition bg-gray-50" data-key="${topic.id}" placeholder="इस विषय के लिए नोट्स यहाँ लिखें...">${noteContent}</textarea>
-                                <div class="flex justify-end items-center mt-3 space-x-3">
-                                     <button class="gemini-summary-btn text-sm bg-cyan-100 text-cyan-800 px-3 py-1 rounded-full hover:bg-cyan-200 transition-colors" data-key="${topic.id}">✨ Summarize</button>
-                                     <span class="note-status text-sm text-green-600 opacity-0" data-key="${topic.id}">सहेजा गया!</span>
-                                     <button class="save-note-btn bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors text-sm" data-key="${topic.id}">नोट्स सहेजें</button>
-                                </div>
-                            </div>
-                        `;
-                    }
-                }
-                tocHTML += '</ul></div>';
-                notesHTML += '</div>';
-
-                container.innerHTML = `
-                    <div class="notebook-page p-4 sm:p-8 rounded-lg">
-                        <h2 class="text-3xl font-bold text-gray-800 border-b pb-4 mb-6">My Digital Notebook</h2>
-                        <div class="flex flex-col lg:flex-row">
-                            ${tocHTML}
-                            ${notesHTML}
-                        </div>
-                    </div>
-                `;
-                addNoteSavingListeners();
-                addNoteGeminiListeners();
-            }
-
-            function renderChatView() {
-                const container = document.getElementById('chat-view');
-                container.innerHTML = `
-                    <div class="bg-white rounded-2xl shadow-lg h-[75vh] flex flex-col">
-                        <div class="p-4 border-b">
-                             <h2 class="text-xl font-bold text-gray-900">AI से Puchein</h2>
-                             <p class="text-sm text-gray-500">AI/ML से जुड़ा कोई भी सवाल पूछें।</p>
-                        </div>
-                        <div id="chat-history" class="flex-1 p-6 overflow-y-auto space-y-4">
-                            <div class="flex justify-start">
-                                <div class="chat-bubble chat-bubble-ai p-3 rounded-lg">
-                                    नमस्ते! मैं आपका AI लर्निंग असिस्टेंट हूँ। आप मुझसे AI, Machine Learning, या इस रोडमैप से जुड़ा कोई भी सवाल पूछ सकते हैं।
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-4 border-t bg-gray-50">
-                            <div class="flex items-center space-x-3">
-                                <input type="text" id="chat-input" class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="अपना सवाल यहाँ टाइप करें...">
-                                <button id="chat-send-btn" class="bg-indigo-600 text-white rounded-full p-3 hover:bg-indigo-700 transition-colors">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                addChatListeners();
-            }
-            
-            function renderTimeManagementView() {
-                const container = document.getElementById('time-view');
-                container.innerHTML = `
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-4">Pomodoro Timer</h2>
-                            <div class="relative w-48 h-48 mx-auto mb-4">
-                                <svg class="w-full h-full" viewBox="0 0 100 100">
-                                    <circle class="text-gray-200" stroke-width="7" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50" />
-                                    <circle id="timer-progress-ring" class="text-indigo-600 timer-circle" stroke-width="7" stroke-linecap="round" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50" transform="rotate(-90 50 50)" />
-                                </svg>
-                                <span id="timer-display" class="absolute inset-0 flex items-center justify-center text-4xl font-bold">25:00</span>
-                            </div>
-                            <div class="flex justify-center space-x-4">
-                                <button id="timer-start-btn" class="bg-green-500 text-white px-6 py-2 rounded-lg font-semibold">Start</button>
-                                <button id="timer-pause-btn" class="bg-yellow-500 text-white px-6 py-2 rounded-lg font-semibold">Pause</button>
-                                <button id="timer-reset-btn" class="bg-red-500 text-white px-6 py-2 rounded-lg font-semibold">Reset</button>
-                            </div>
-                        </div>
-                        <div class="bg-white p-6 rounded-2xl shadow-lg">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-4">To-Do List</h2>
-                            <div class="flex mb-4">
-                                <input id="task-input" type="text" placeholder="Naya task jodein..." class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-indigo-500">
-                                <button id="add-task-btn" class="bg-indigo-600 text-white px-4 rounded-r-lg font-semibold">+</button>
-                            </div>
-                            <ul id="task-list" class="space-y-2 h-48 overflow-y-auto"></ul>
-                        </div>
-                        <div class="lg:col-span-3 bg-white p-6 rounded-2xl shadow-lg">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-4">Study Log</h2>
-                            <ul id="study-log-list" class="space-y-2 h-48 overflow-y-auto">
-                                <!-- Logs will be here -->
-                            </ul>
-                        </div>
-                    </div>
-                `;
-                addTimerListeners();
-                addTaskListeners();
-                renderTasks();
-                renderStudyLog();
-            }
-
-            // --- Navigation ---
-            function switchView(hash) {
-                views.forEach(view => view.classList.add('hidden'));
-                navLinks.forEach(link => link.classList.remove('bg-gray-700', 'text-white'));
-                
-                const activeLink = document.querySelector(`.nav-link[href="${hash}"]`);
-                const activeView = document.querySelector(`${hash}-view`);
-                
-                if (activeLink && activeView) {
-                    activeLink.classList.add('bg-gray-700', 'text-white');
-                    activeView.classList.remove('hidden');
-                    viewTitle.textContent = activeLink.textContent.trim();
-                } else {
-                    document.querySelector('.nav-link[href="#dashboard"]').classList.add('bg-gray-700', 'text-white');
-                    document.getElementById('dashboard-view').classList.remove('hidden');
-                    viewTitle.textContent = 'Dashboard';
-                }
-                
-                if (hash === '#dashboard') renderDashboardView();
-                if (hash === '#roadmap') renderRoadmapView();
-                if (hash === '#progress') renderProgressView();
-                if (hash === '#notebook') renderNotebookView();
-                if (hash === '#chat') renderChatView();
-                if (hash === '#time') renderTimeManagementView();
-            }
-
-            navLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    window.location.hash = new URL(link.href).hash;
-                    if (window.innerWidth < 768) {
-                        sidebar.classList.add('-translate-x-full');
-                    }
-                });
-            });
-            
-            window.addEventListener('hashchange', () => switchView(window.location.hash));
-            
-            menuToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('-translate-x-full');
-            });
-
-            // --- User Data Helpers (Notes, Progress) ---
-            async function getUserDocRef() {
-                if (!currentUser) return null;
-                return doc(db, "users", currentUser.uid);
-            }
-
-            async function getUserData() {
-                const userDocRef = await getUserDocRef();
-                if (!userDocRef) return {};
-                const docSnap = await getDoc(userDocRef).catch(err => console.error("Firestore read error:", err));
-                return docSnap && docSnap.exists() ? docSnap.data() : {};
-            }
-
-            async function getNote(topicId) {
-                const data = await getUserData();
-                return data.notes ? data.notes[topicId] : '';
-            }
-            async function saveNote(topicId, content) {
-                const userDocRef = await getUserDocRef();
-                await setDoc(userDocRef, { notes: { [topicId]: content } }, { merge: true }).catch(err => console.error("Firestore write error:", err));
-            }
-            
-            // --- Notes Logic ---
-            function addNoteSavingListeners() {
-                document.querySelectorAll('.save-note-btn').forEach(button => {
-                    button.addEventListener('click', async () => {
-                        const key = button.dataset.key;
-                        const textarea = document.querySelector(`textarea[data-key="${key}"]`);
-                        await saveNote(key, textarea.value);
-                        
-                        const status = document.querySelector(`.note-status[data-key="${key}"]`);
-                        status.style.opacity = '1';
-                        setTimeout(() => { status.style.opacity = '0'; }, 2000);
-                    });
-                });
-            }
-
-            // --- Progress Tracking Logic ---
-            let userProgressCache = {};
-            async function fetchAllProgress() {
-                const data = await getUserData();
-                userProgressCache = data.progress || {};
-            }
-
-            function calculateStageProgress(stageId) {
-                const stage = roadmapData.find(s => s.id === stageId);
-                if (!stage) return 0;
-                const totalTopics = stage.topics.length;
-                if (totalTopics === 0) return 100;
-                const completedTopics = stage.topics.filter(topic => userProgressCache[topic.id]).length;
-                return (completedTopics / totalTopics) * 100;
-            }
-
-            function calculateOverallProgress() {
-                const allTopics = roadmapData.flatMap(stage => stage.topics);
-                const totalTopics = allTopics.length;
-                if (totalTopics === 0) return 100;
-                const completedTopics = allTopics.filter(topic => userProgressCache[topic.id]).length;
-                return (completedTopics / totalTopics) * 100;
-            }
-            
-            function getCompletedTopicCount() {
-                return Object.values(userProgressCache).filter(Boolean).length;
-            }
-
-            async function saveProgress(topicId, isCompleted) {
-                const userDocRef = await getUserDocRef();
-                await setDoc(userDocRef, { progress: { [topicId]: isCompleted } }, { merge: true }).catch(err => console.error("Firestore write error:", err));
-            }
-
-            function addProgressCheckboxListeners() {
-                document.querySelectorAll('.progress-checkbox').forEach(checkbox => {
-                    checkbox.addEventListener('change', async (e) => {
-                        const topicId = e.target.dataset.topicId;
-                        const isCompleted = e.target.checked;
-                        await saveProgress(topicId, isCompleted);
-                        userProgressCache[topicId] = isCompleted; // Update cache
-                    });
-                });
-            }
-
-            function updateProgressCheckboxes() {
-                document.querySelectorAll('.progress-checkbox').forEach(checkbox => {
-                    checkbox.checked = userProgressCache[checkbox.dataset.topicId] || false;
-                });
-            }
-            
-            // --- Accordion Logic ---
-            function addAccordionListeners() {
-                document.querySelectorAll('.accordion-button').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                         if (e.target.type === 'checkbox') return;
-                        const content = button.nextElementSibling;
-                        content.classList.toggle('hidden');
-                        const arrow = button.querySelector('.arrow');
-                        arrow.classList.toggle('rotate-90');
-                    });
-                });
-            }
-            
-            // --- Gemini API & Settings Logic ---
-            const geminiModal = document.getElementById('gemini-modal');
-            const geminiModalTitle = document.getElementById('gemini-modal-title');
-            const geminiModalContent = document.getElementById('gemini-modal-content');
-            const geminiModalClose = document.getElementById('gemini-modal-close');
-            const loadingIndicator = document.getElementById('loading-indicator');
-            const settingsBtn = document.getElementById('settings-btn');
-            const settingsModalClose = document.getElementById('settings-modal-close');
-            const saveApiKeyBtn = document.getElementById('save-api-key-btn');
-            const apiKeyInput = document.getElementById('api-key-input');
-
-            function showLoading(show) { loadingIndicator.classList.toggle('hidden', !show); }
-            function showModal(title, content) {
-                geminiModalTitle.textContent = title;
-                geminiModalContent.innerHTML = content.replace(/\n/g, '<br>');
-                geminiModal.classList.remove('hidden');
-                setTimeout(() => geminiModal.classList.remove('opacity-0'), 10);
-            }
-            function hideModal(modal) {
-                modal.classList.add('opacity-0');
-                setTimeout(() => modal.classList.add('hidden'), 300);
-            }
-            geminiModalClose.addEventListener('click', () => hideModal(geminiModal));
-            settingsBtn.addEventListener('click', async () => {
-                const data = await getUserData();
-                apiKeyInput.value = data.apiKey || '';
-                settingsModal.classList.remove('hidden');
-                setTimeout(() => settingsModal.classList.remove('opacity-0'), 10);
-            });
-            settingsModalClose.addEventListener('click', () => hideModal(settingsModal));
-            saveApiKeyBtn.addEventListener('click', async () => {
-                const userDocRef = await getUserDocRef();
-                await setDoc(userDocRef, { apiKey: apiKeyInput.value }, { merge: true });
-                hideModal(settingsModal);
-                alert('API Key saved successfully!');
-            });
-
-            async function callGeminiAPI(prompt) {
-                const data = await getUserData();
-                const apiKey = data.apiKey;
-                if (!apiKey) {
-                    alert('Please set your Gemini API key in the settings first.');
-                    settingsBtn.click();
-                    return null;
-                }
-                showLoading(true);
-                const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    const result = await response.json();
-                    if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                        return result.candidates[0].content.parts[0].text;
-                    }
-                    return "माफ़ कीजिए, कोई जवाब नहीं मिला।";
-                } catch (error) {
-                    return `एक त्रुटि हुई: ${error.message}.`;
-                } finally {
-                    showLoading(false);
-                }
-            }
-
-            async function handleGeminiRequest(prompt, modalTitle) {
-                const response = await callGeminiAPI(prompt);
-                if (response) {
-                    showModal(modalTitle, response);
-                }
-            }
-
-            function addGeminiButtonListeners() {
-                document.querySelectorAll('.gemini-explain-btn, .gemini-question-btn, .gemini-analogy-btn, .gemini-project-btn').forEach(button => {
-                    button.addEventListener('click', async () => {
-                        const topic = button.dataset.title;
-                        let prompt, modalTitle;
-                        if (button.classList.contains('gemini-explain-btn')) {
-                            prompt = `"${topic}" विषय को सरल हिंदी में, उदाहरणों के साथ समझाएं।`;
-                            modalTitle = `'${topic}' का स्पष्टीकरण`;
-                        } else if (button.classList.contains('gemini-question-btn')) {
-                            prompt = `"${topic}" विषय के लिए 3 बहुविकल्पीय अभ्यास प्रश्न (MCQs) उत्तरों के साथ हिंदी में बनाएं।`;
-                            modalTitle = `'${topic}' के लिए अभ्यास प्रश्न`;
-                        } else if (button.classList.contains('gemini-analogy-btn')) {
-                            prompt = `"${topic}" की अवधारणा को एक सरल, वास्तविक दुनिया के सादृश्य (analogy) का उपयोग करके हिंदी में समझाएं।`;
-                            modalTitle = `'${topic}' के लिए Analogy`;
-                        } else if (button.classList.contains('gemini-project-btn')) {
-                            prompt = `"${topic}" विषय पर एक शुरुआती सीखने वाले के लिए 3 रचनात्मक और व्यावहारिक प्रोजेक्ट विचार (project ideas) एक सूची के रूप में हिंदी में दें।`;
-                            modalTitle = `'${topic}' के लिए Project Ideas`;
-                        }
-                        handleGeminiRequest(prompt, modalTitle);
-                    });
-                });
-            }
-
-            function addNoteGeminiListeners() {
-                 document.querySelectorAll('.gemini-summary-btn').forEach(button => {
-                    button.addEventListener('click', async () => {
-                        const key = button.dataset.key;
-                        const textarea = document.querySelector(`textarea[data-key="${key}"]`);
-                        const noteContent = textarea.value;
-                        if (!noteContent.trim()) {
-                            alert('कृपया सारांश बनाने के लिए पहले कुछ नोट्स लिखें।');
-                            return;
-                        }
-                        const prompt = `निम्नलिखित नोट्स को कुछ प्रमुख बिंदुओं (key bullet points) में हिंदी में सारांशित करें। नोट्स: "${noteContent}"`;
-                        handleGeminiRequest(prompt, 'आपके नोट्स का सारांश');
-                    });
-                });
-            }
-            
-            // --- AI Chat Logic ---
-            function addChatListeners() {
-                const chatInput = document.getElementById('chat-input');
-                const chatSendBtn = document.getElementById('chat-send-btn');
-                const handleSend = async () => {
-                    const userInput = chatInput.value.trim();
-                    if (!userInput) return;
-                    appendChatMessage(userInput, 'user');
-                    chatInput.value = '';
-                    const prompt = `You are an AI learning assistant. A user has asked the following question in Hindi: "${userInput}". Provide a helpful and clear answer in Hindi.`;
-                    const aiResponse = await callGeminiAPI(prompt);
-                    if (aiResponse) {
-                        appendChatMessage(aiResponse, 'ai');
-                    }
-                };
-                chatSendBtn.addEventListener('click', handleSend);
-                chatInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') handleSend();
-                });
-            }
-
-            function appendChatMessage(message, sender) {
-                const chatHistory = document.getElementById('chat-history');
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
-                const bubbleDiv = document.createElement('div');
-                bubbleDiv.className = `chat-bubble p-3 rounded-lg ${sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`;
-                bubbleDiv.innerHTML = message.replace(/\n/g, '<br>');
-                messageDiv.appendChild(bubbleDiv);
-                chatHistory.appendChild(messageDiv);
-                chatHistory.scrollTop = chatHistory.scrollHeight;
-            }
-
-            // --- Initial App Load ---
-            async function initializeApp() {
-                authModal.classList.add('hidden');
-                appContainer.classList.remove('hidden');
-                usernameDisplay.textContent = currentUser.displayName || currentUser.email.split('@')[0];
-                await fetchAllProgress();
-                switchView(window.location.hash || '#dashboard');
-            }
-        });
-    </script>
+// ======================== TOAST ========================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
 </body>
 </html>
