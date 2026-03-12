@@ -60,6 +60,20 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .sb-urole{font-size:.62rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
 .logout-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.7rem;font-family:'JetBrains Mono',monospace;margin-top:8px;width:100%;text-align:center;padding:6px;border-radius:6px;transition:all .2s}
 .logout-btn:hover{color:var(--danger);background:rgba(239,68,68,.08)}
+.backup-bar{background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-top:8px;cursor:pointer;transition:all .2s}
+.backup-bar:hover{border-color:var(--a3)}
+.backup-status{font-size:.6rem;font-family:'JetBrains Mono',monospace;letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+.backup-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.backup-dot.ok{background:var(--success);box-shadow:0 0 6px var(--success)}
+.backup-dot.warn{background:var(--warn);box-shadow:0 0 6px var(--warn);animation:pulse 1.5s infinite}
+.backup-time{color:var(--muted);font-size:.58rem;margin-top:3px}
+.backup-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);z-index:9995;background:var(--s1);border:1px solid rgba(184,255,0,.3);border-radius:12px;padding:12px 20px;display:flex;align-items:center;gap:10px;font-size:.82rem;white-space:nowrap;transition:transform .4s cubic-bezier(.68,-.55,.27,1.55);box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.backup-toast.show{transform:translateX(-50%) translateY(0)}
+.backup-toast-icon{font-size:1.1rem}
+.backup-toast-text{color:var(--text)}
+.backup-toast-file{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--a3)}
+.backup-warn-banner{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:14px;font-size:.85rem}
+.backup-warn-banner.hidden{display:none}
 
 /* ═══════ MAIN CONTENT ═══════ */
 .main-content{margin-left:240px;padding:32px;min-height:100vh}
@@ -332,7 +346,23 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       <div class="sb-avatar">S</div>
       <div><div class="sb-uname">Sonu</div><div class="sb-urole">ADMIN</div></div>
     </div>
+    <div class="backup-bar" onclick="manualBackup()" title="Click to backup now">
+      <div class="backup-status">
+        <div class="backup-dot warn" id="backupDot"></div>
+        <span id="backupStatusText" style="color:var(--muted2)">💾 Backup</span>
+      </div>
+      <div class="backup-time" id="backupTimeText">Click to save file</div>
+    </div>
     <button class="logout-btn" onclick="logout()">🔒 Lock Dashboard</button>
+  </div>
+</div>
+
+<!-- BACKUP TOAST -->
+<div class="backup-toast" id="backupToast">
+  <span class="backup-toast-icon">📥</span>
+  <div>
+    <div class="backup-toast-text">Backup download ho raha hai!</div>
+    <div class="backup-toast-file" id="backupToastFile"></div>
   </div>
 </div>
 
@@ -350,6 +380,16 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       <button class="btn btn-primary" onclick="nav('crm');openClientModal()">+ New Client</button>
       <button class="btn btn-cyan" onclick="nav('invoice')">🧾 New Invoice</button>
     </div>
+  </div>
+
+  <div class="backup-warn-banner hidden" id="backupWarnBanner">
+    <span style="font-size:1.4rem">⚠️</span>
+    <div style="flex:1">
+      <div style="font-weight:700;color:var(--warn)">Backup reminder!</div>
+      <div style="font-size:.8rem;color:var(--muted2);font-family:'Noto Sans Devanagari',sans-serif" id="backupWarnMsg">Kaafi dino se backup nahi liya</div>
+    </div>
+    <button class="btn btn-outline btn-sm" style="border-color:var(--warn);color:var(--warn)" onclick="manualBackup()">📥 Backup Now</button>
+    <button class="btn btn-outline btn-xs" style="opacity:.5" onclick="document.getElementById('backupWarnBanner').classList.add('hidden')">✕</button>
   </div>
 
   <div class="stats-row" id="dashStats"></div>
@@ -696,14 +736,21 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   </div>
 
   <div class="settings-section">
-    <div class="settings-title">💾 Data Management</div>
+    <div class="settings-title">💾 Backup & Data Management</div>
+    <div style="background:var(--s2);border:1px solid rgba(184,255,0,.2);border-radius:12px;padding:16px 18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div>
+        <div style="font-weight:700;color:var(--a3);margin-bottom:4px">🤖 Auto-Backup on Every Save</div>
+        <div style="font-size:.78rem;color:var(--muted2);font-family:'Noto Sans Devanagari',sans-serif">ON karo — har baar client ya invoice save karne pe automatic .json file download hogi</div>
+      </div>
+      <div class="toggle" id="autoBackupToggle" onclick="toggleAutoBackup()" style="flex-shrink:0"></div>
+    </div>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
-      <button class="btn btn-outline" onclick="exportData()">📤 Export All Data (JSON)</button>
-      <button class="btn btn-outline" onclick="importDataTrigger()">📥 Import Data</button>
+      <button class="btn btn-success" onclick="manualBackup()">📥 Backup Now (Download)</button>
+      <button class="btn btn-outline" onclick="importDataTrigger()">📤 Restore from Backup</button>
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
       <button class="btn btn-danger" onclick="clearAllData()">🗑️ Clear All Data</button>
     </div>
-    <p style="font-size:.75rem;color:var(--muted);margin-top:12px;font-family:'JetBrains Mono',monospace">Data sirf aapke browser mein saved hai. Export karke backup rakho.</p>
+    <div id="lastBackupInfo" style="font-size:.72rem;color:var(--muted);margin-top:14px;font-family:'JetBrains Mono',monospace;padding:10px;background:var(--s2);border-radius:8px;border:1px solid var(--border)">Loading backup info...</div>
   </div>
 </div>
 
@@ -907,6 +954,9 @@ function initApp(){
   const greet = now<12?'Morning':now<17?'Afternoon':'Evening';
   document.getElementById('greetTime').textContent = greet;
   renderDashboard();
+  updateBackupStatus();
+  checkBackupWarning();
+  if(isAutoBackupOn()) document.getElementById('autoBackupToggle')?.classList.add('on');
 }
 
 // ═══════════════════════════════════════════
@@ -1105,6 +1155,7 @@ function saveClient(){
   closeClientModal();
   renderCRM();
   renderDashboard();
+  autoBackup();
 }
 
 function deleteClient(id){
@@ -1433,6 +1484,7 @@ function saveInvoice(){
     const idx = clients.findIndex(c=>c.id===clientId);
     if(idx>-1){ clients[idx].payment='due'; setClients(clients); }
   }
+  autoBackup();
 }
 
 function clearInvoice(){
@@ -1601,6 +1653,9 @@ function loadSettings(){
   document.getElementById('setGST').value = s.gst||'';
   document.getElementById('setUPI').value = s.upi||'';
   document.getElementById('setBankDetails').value = s.bankDetails||'';
+  const toggle = document.getElementById('autoBackupToggle');
+  if(toggle) toggle.classList.toggle('on', isAutoBackupOn());
+  updateLastBackupInfo();
 }
 
 function saveSettings(){
@@ -1616,6 +1671,7 @@ function saveSettings(){
   };
   saveSettingsData(s);
   notify('✅ Settings save ho gaye!','success');
+  autoBackup();
 }
 
 function changePassword(){
@@ -1634,22 +1690,152 @@ function changePassword(){
 }
 
 // ═══════════════════════════════════════════
-// DATA BACKUP
+// AUTO-EXPORT / BACKUP ENGINE
 // ═══════════════════════════════════════════
-function exportData(){
+const BACKUP_KEY = 'dw_last_backup';
+const AUTO_BACKUP_KEY = 'dw_auto_backup';
+
+function isAutoBackupOn(){
+  return localStorage.getItem(AUTO_BACKUP_KEY) === '1';
+}
+
+function toggleAutoBackup(){
+  const toggle = document.getElementById('autoBackupToggle');
+  const isOn = isAutoBackupOn();
+  if(isOn){
+    localStorage.setItem(AUTO_BACKUP_KEY,'0');
+    toggle.classList.remove('on');
+    notify('Auto-backup OFF kar diya','info');
+  } else {
+    localStorage.setItem(AUTO_BACKUP_KEY,'1');
+    toggle.classList.add('on');
+    notify('✅ Auto-backup ON! Har save pe file download hogi','success');
+    createBackupFile(false);
+  }
+  updateBackupStatus();
+  updateLastBackupInfo();
+}
+
+function createBackupFile(silent=false){
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0];
+  const timeStr = now.toTimeString().split(' ')[0].replace(/:/g,'-');
+  const clients = getClients();
+  const invoices = getInvoices();
+  const filename = `drownford-backup-${dateStr}_${timeStr}.json`;
+
   const data = {
-    clients: getClients(),
-    invoices: getInvoices(),
-    settings: getSettings(),
-    exportedAt: new Date().toISOString()
+    version: '2.0',
+    exportedAt: now.toISOString(),
+    totalClients: clients.length,
+    totalInvoices: invoices.length,
+    clients, invoices,
+    settings: getSettings()
   };
-  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `drownford-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.download = filename;
+  document.body.appendChild(a);
   a.click();
-  notify('📤 Data export ho gaya!','success');
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+
+  localStorage.setItem(BACKUP_KEY, now.toISOString());
+  if(!silent) showBackupToast(filename, clients.length, invoices.length);
+  updateBackupStatus();
+  updateLastBackupInfo();
 }
+
+function manualBackup(){ createBackupFile(false); }
+
+function autoBackup(){
+  if(isAutoBackupOn()){
+    setTimeout(()=>createBackupFile(false), 600);
+  }
+}
+
+function showBackupToast(filename, clients, invoices){
+  const toast = document.getElementById('backupToast');
+  document.getElementById('backupToastFile').textContent =
+    `📁 ${filename}  |  👥 ${clients} clients  |  🧾 ${invoices} invoices`;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'), 4500);
+}
+
+function updateBackupStatus(){
+  const lastBackup = localStorage.getItem(BACKUP_KEY);
+  const dot = document.getElementById('backupDot');
+  const statusText = document.getElementById('backupStatusText');
+  const timeText = document.getElementById('backupTimeText');
+  if(!dot) return;
+  const autoOn = isAutoBackupOn();
+
+  if(!lastBackup){
+    dot.className='backup-dot warn';
+    statusText.textContent = '⚠️ No Backup Yet!';
+    timeText.textContent = 'Click to backup now';
+    return;
+  }
+  const diffHrs = (new Date() - new Date(lastBackup)) / (1000*60*60);
+  const diffDays = Math.floor(diffHrs/24);
+
+  if(diffHrs < 1){
+    dot.className='backup-dot ok';
+    statusText.textContent = autoOn ? '🤖 Auto ON ✅' : '✅ Backed up';
+    timeText.textContent = 'Just now';
+  } else if(diffHrs < 24){
+    dot.className='backup-dot ok';
+    statusText.textContent = autoOn ? '🤖 Auto ON' : '✅ Backed up';
+    timeText.textContent = `${Math.floor(diffHrs)}h pehle`;
+  } else if(diffDays < 7){
+    dot.className='backup-dot warn';
+    statusText.textContent = autoOn ? '🤖 Auto ON' : '⚠️ Old backup';
+    timeText.textContent = `${diffDays} din pehle`;
+  } else {
+    dot.className='backup-dot warn';
+    statusText.textContent = '⚠️ Backup lo!';
+    timeText.textContent = `${diffDays} din se nahi`;
+  }
+}
+
+function checkBackupWarning(){
+  const lastBackup = localStorage.getItem(BACKUP_KEY);
+  const banner = document.getElementById('backupWarnBanner');
+  const msg = document.getElementById('backupWarnMsg');
+  if(!banner) return;
+  if(!lastBackup){
+    banner.classList.remove('hidden');
+    msg.textContent = 'Abhi tak koi backup nahi! Seedha data loss ho sakta hai.';
+    return;
+  }
+  const diffDays = (new Date() - new Date(lastBackup)) / (1000*60*60*24);
+  if(diffDays > 3 && !isAutoBackupOn()){
+    banner.classList.remove('hidden');
+    msg.textContent = `${Math.floor(diffDays)} din se backup nahi liya. Auto-backup ON karo ya abhi backup lo!`;
+  } else {
+    banner.classList.add('hidden');
+  }
+}
+
+function updateLastBackupInfo(){
+  const el = document.getElementById('lastBackupInfo');
+  if(!el) return;
+  const lastBackup = localStorage.getItem(BACKUP_KEY);
+  const autoOn = isAutoBackupOn();
+  const c = getClients().length;
+  const inv = getInvoices().length;
+  const autoTag = autoOn ? '<span style="color:var(--a3)">ON ✅</span>' : '<span style="color:var(--danger)">OFF ❌</span>';
+  if(!lastBackup){
+    el.innerHTML = `⚠️ LAST BACKUP: Kabhi nahi &nbsp;|&nbsp; 👥 ${c} clients &nbsp;|&nbsp; 🧾 ${inv} invoices &nbsp;|&nbsp; AUTO-BACKUP: ${autoTag}`;
+  } else {
+    const last = new Date(lastBackup);
+    el.innerHTML = `✅ LAST: ${last.toLocaleDateString('en-IN')} ${last.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})} &nbsp;|&nbsp; 👥 ${c} clients &nbsp;|&nbsp; 🧾 ${inv} invoices &nbsp;|&nbsp; AUTO: ${autoTag}`;
+  }
+}
+
+function exportData(){ manualBackup(); }
 
 function importDataTrigger(){ document.getElementById('importFile').click(); }
 
@@ -1660,24 +1846,30 @@ function importData(e){
   reader.onload = (ev) => {
     try{
       const data = JSON.parse(ev.target.result);
+      if(!data.clients && !data.invoices){ notify('❌ Invalid backup file','error'); return; }
       if(data.clients) setClients(data.clients);
       if(data.invoices) setInvoices(data.invoices);
       if(data.settings) saveSettingsData(data.settings);
-      notify('✅ Data import ho gaya!','success');
+      notify(`✅ Restore complete! ${data.clients?.length||0} clients, ${data.invoices?.length||0} invoices`,'success');
       renderDashboard();
+      updateBackupStatus();
+      checkBackupWarning();
     } catch(err){
-      notify('❌ Invalid file','error');
+      notify('❌ Invalid file — sahi backup file select karo','error');
     }
   };
   reader.readAsText(file);
+  e.target.value = '';
 }
 
 function clearAllData(){
   if(!confirm('KHATAM? Sab data delete ho jaayega. Are you sure?')) return;
   if(!confirm('Pakka sure ho? Backup le liya?')) return;
   ['dw_clients','dw_invoices'].forEach(k=>localStorage.removeItem(k));
+  localStorage.removeItem(BACKUP_KEY);
   notify('🗑️ All data cleared','info');
   renderDashboard();
+  updateBackupStatus();
 }
 
 // ═══════════════════════════════════════════
