@@ -2,1058 +2,1321 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>⚡ Math Tug of War</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>⚔️ Math Fighter — Master the Numbers!</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#060612;--panel:#0e0e20;--panel2:#14142a;
-  --player:#00f5ff;--enemy:#ff3366;--gold:#ffd700;
-  --success:#00ff88;--danger:#ff4455;
-  --text:#e8eaff;--muted:#6666aa;
-  --purple:#9b59ff;
+  --bg:#07000f;
+  --p1:#00d4ff; --p1d:#0088cc;
+  --ec:#ff2244; --ecd:#aa0022;
+  --gold:#ffd700; --green:#00ff88; --purple:#cc44ff;
+  --skin:#fdbcb4; --skin2:#f0a896;
 }
-html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;user-select:none;-webkit-user-select:none}
+html,body{width:100%;height:100%;overflow:hidden;user-select:none;-webkit-user-select:none;
+  font-family:'Nunito',sans-serif;background:var(--bg);color:#fff;touch-action:none}
+#fx{position:fixed;inset:0;z-index:500;pointer-events:none}
 
-/* ── STARS ── */
-.stars{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none}
-.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d) var(--delay) infinite ease-in-out}
-@keyframes twinkle{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:.9;transform:scale(1.6)}}
-.nebula{position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:radial-gradient(ellipse 60% 40% at 20% 80%,rgba(155,89,255,.07) 0%,transparent 70%),
-             radial-gradient(ellipse 50% 30% at 80% 20%,rgba(0,245,255,.05) 0%,transparent 70%)}
+/* ─── SCREENS ─── */
+.scr{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .35s;z-index:10;overflow:hidden}
+.scr.on{opacity:1;pointer-events:all}
 
-/* ── SCREENS ── */
-.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:10;padding:20px;overflow-y:auto;overflow-x:hidden}
-.screen.active{display:flex}
-
-/* ── LOGO ── */
-.logo{font-family:'Orbitron',monospace;font-size:clamp(26px,8vw,62px);font-weight:900;text-align:center;line-height:1.1;margin-bottom:4px;
-  background:linear-gradient(135deg,var(--player) 0%,var(--gold) 50%,var(--enemy) 100%);
+/* ─── MENU ─── */
+#s-menu{background:radial-gradient(ellipse at 50% 60%, #1a0030 0%, #07000f 70%)}
+.menu-fighters{display:flex;justify-content:space-between;align-items:flex-end;width:100%;max-width:420px;padding:0 10px;margin-bottom:-10px;position:relative;z-index:2}
+.menu-fighter-wrap{display:flex;flex-direction:column;align-items:center}
+.menu-vs{font-family:'Bangers',cursive;font-size:64px;color:var(--gold);
+  text-shadow:0 0 30px var(--gold),0 4px 0 #996600;letter-spacing:4px;
+  animation:vsPulse 1.5s ease-in-out infinite alternate;position:relative;z-index:3}
+@keyframes vsPulse{from{transform:scale(1)}to{transform:scale(1.12);text-shadow:0 0 50px var(--gold),0 4px 0 #996600}}
+.game-logo{font-family:'Bangers',cursive;font-size:clamp(36px,11vw,72px);text-align:center;line-height:1;
+  background:linear-gradient(180deg,#fff 0%,var(--gold) 50%,#ff6600 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  filter:drop-shadow(0 0 24px rgba(0,245,255,.5))}
-.logo-sub{font-family:'Orbitron',monospace;font-size:clamp(9px,2.5vw,14px);color:var(--gold);letter-spacing:5px;text-align:center;margin-bottom:6px;opacity:.75}
-.divider{width:70px;height:2px;margin:10px auto 20px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+  filter:drop-shadow(0 0 20px rgba(255,215,0,.6));letter-spacing:3px;margin-bottom:4px}
+.game-tagline{font-size:12px;letter-spacing:4px;color:var(--gold);opacity:.7;text-align:center;margin-bottom:20px}
+.menu-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px}
+.mbtn{padding:16px 24px;font-family:'Bangers',cursive;font-size:22px;letter-spacing:3px;
+  border:3px solid;background:transparent;cursor:pointer;border-radius:8px;position:relative;overflow:hidden;
+  transition:transform .15s,box-shadow .15s;width:100%}
+.mbtn::before{content:'';position:absolute;inset:0;background:currentColor;opacity:0;transition:opacity .15s}
+.mbtn:hover{transform:translateY(-3px)}.mbtn:hover::before{opacity:.1}
+.mbtn:active{transform:scale(.96)}
+.mbtn.c{color:var(--p1);border-color:var(--p1);box-shadow:0 0 20px rgba(0,212,255,.3)}
+.mbtn.g{color:var(--gold);border-color:var(--gold);box-shadow:0 0 20px rgba(255,215,0,.3)}
+.mbtn.p{color:var(--purple);border-color:var(--purple);box-shadow:0 0 20px rgba(204,68,255,.3)}
+.crowd-bg{position:absolute;bottom:0;left:0;right:0;height:80px;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0px,rgba(255,255,255,.03) 2px,transparent 2px,transparent 20px);
+  opacity:.6}
+.fire-l,.fire-r{position:absolute;bottom:0;width:60px;height:100%;
+  background:linear-gradient(0deg,rgba(255,80,0,.4),transparent);
+  animation:fireDance .8s ease-in-out infinite alternate}
+.fire-l{left:0}.fire-r{right:0;animation-delay:.4s}
+@keyframes fireDance{from{opacity:.3;transform:scaleX(.9)}to{opacity:.7;transform:scaleX(1.1)}}
 
-/* ── BUTTONS ── */
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;max-width:300px;padding:14px 20px;margin:7px auto;
-  font-family:'Orbitron',monospace;font-size:clamp(11px,3.2vw,14px);font-weight:700;letter-spacing:2px;
-  border:2px solid;background:transparent;cursor:pointer;border-radius:6px;
-  transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden}
-.btn::after{content:'';position:absolute;inset:0;background:currentColor;opacity:0;transition:opacity .18s}
-.btn:hover::after,.btn:active::after{opacity:.12}
-.btn:hover{transform:translateY(-2px)}
-.btn:active{transform:translateY(1px)}
-.btn-c{color:var(--player);border-color:var(--player);box-shadow:0 0 16px rgba(0,245,255,.25)}
-.btn-g{color:var(--gold);border-color:var(--gold);box-shadow:0 0 16px rgba(255,215,0,.25)}
-.btn-r{color:var(--enemy);border-color:var(--enemy);box-shadow:0 0 16px rgba(255,51,102,.25)}
-.btn-s{color:var(--success);border-color:var(--success);box-shadow:0 0 16px rgba(0,255,136,.25)}
-.btn-p{color:var(--purple);border-color:var(--purple);box-shadow:0 0 16px rgba(155,89,255,.25)}
+/* ─── CHAR SELECT ─── */
+#s-char{background:radial-gradient(ellipse at 50% 40%, #0a002a 0%, #07000f 70%)}
+.cs-title{font-family:'Bangers',cursive;font-size:clamp(28px,9vw,52px);color:var(--gold);
+  letter-spacing:4px;text-shadow:0 0 20px var(--gold);margin-bottom:6px;text-align:center}
+.cs-sub{font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.5);margin-bottom:20px;text-align:center}
+.char-cards{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+.cc{background:rgba(255,255,255,.04);border:3px solid rgba(255,255,255,.12);border-radius:18px;
+  padding:16px 14px;text-align:center;cursor:pointer;transition:all .22s cubic-bezier(.34,1.56,.64,1);
+  min-width:120px;position:relative;overflow:hidden}
+.cc::after{content:'';position:absolute;inset:0;background:var(--p1);opacity:0;transition:opacity .2s;border-radius:15px}
+.cc:hover{transform:translateY(-4px) scale(1.04);border-color:rgba(0,212,255,.4)}
+.cc.sel{border-color:var(--p1);box-shadow:0 0 28px rgba(0,212,255,.5),inset 0 0 20px rgba(0,212,255,.06)}
+.cc.sel::after{opacity:.04}
+.cc-nm{font-family:'Bangers',cursive;font-size:20px;letter-spacing:2px;color:var(--p1);margin-top:8px;position:relative;z-index:1}
+.cc-type{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:2px;margin-top:2px;position:relative;z-index:1}
+.cc-stat{display:flex;gap:6px;justify-content:center;margin-top:6px;position:relative;z-index:1}
+.cc-s{font-size:9px;color:rgba(255,255,255,.5);background:rgba(255,255,255,.07);padding:2px 7px;border-radius:10px}
 
-/* ── SECTION TITLE ── */
-.sec-title{font-family:'Orbitron',monospace;font-size:clamp(10px,2.8vw,13px);color:var(--gold);letter-spacing:4px;text-align:center;margin:16px 0 8px;text-transform:uppercase}
+/* ─── VS SCREEN ─── */
+#s-vs{background:#000;overflow:hidden}
+.vs-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,#1a0000,#000);
+  animation:vsBgPulse .5s ease-in-out infinite alternate}
+@keyframes vsBgPulse{from{background:radial-gradient(circle at 50% 50%,#1a0000,#000)}to{background:radial-gradient(circle at 50% 50%,#2a0010,#000)}}
+.vs-fighters{display:flex;justify-content:space-between;align-items:flex-end;width:100%;max-width:460px;position:relative;z-index:2;padding:0 20px}
+.vs-name{font-family:'Bangers',cursive;font-size:clamp(28px,8vw,48px);letter-spacing:3px;text-align:center;
+  text-shadow:0 0 20px currentColor;margin-top:10px}
+.vs-title{font-size:11px;letter-spacing:3px;opacity:.6;text-align:center}
+.vs-big{font-family:'Bangers',cursive;font-size:clamp(70px,22vw,130px);color:#fff;
+  text-shadow:0 0 60px rgba(255,0,0,.8),0 0 120px rgba(255,0,0,.4),0 8px 0 #660000;
+  letter-spacing:6px;animation:vsSlam .3s cubic-bezier(.34,1.56,.64,1);position:relative;z-index:2}
+@keyframes vsSlam{from{transform:scale(3);opacity:0}to{transform:scale(1);opacity:1}}
+.vs-flare{position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.15),transparent 60%);
+  animation:vsFlare .4s ease-out forwards}
+@keyframes vsFlare{from{opacity:1;transform:scale(.5)}to{opacity:0;transform:scale(2.5)}}
 
-/* ── MODE CARDS ── */
-.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:480px;margin:4px 0 12px}
-.mode-card{background:var(--panel);border:2px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 10px;text-align:center;cursor:pointer;transition:all .22s;position:relative;overflow:hidden}
-.mode-card::before{content:'';position:absolute;inset:0;background:var(--player);opacity:0;transition:opacity .22s;border-radius:12px}
-.mode-card.sel,.mode-card:hover{border-color:var(--player);box-shadow:0 0 22px rgba(0,245,255,.3);transform:translateY(-3px)}
-.mode-card.sel::before,.mode-card:hover::before{opacity:.06}
-.mode-card .mc-icon{font-size:30px;display:block;margin-bottom:6px;position:relative;z-index:1}
-.mode-card .mc-name{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;color:var(--player);letter-spacing:1px;position:relative;z-index:1}
-.mode-card .mc-desc{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.3;position:relative;z-index:1}
+/* ─── FIGHT SCREEN ─── */
+#s-fight{padding:0;justify-content:flex-start;overflow:hidden}
+.fight-wrap{display:flex;flex-direction:column;width:100%;height:100%;max-width:500px;margin:0 auto;overflow:hidden}
 
-/* ── DIFF / OP BUTTONS ── */
-.pill-row{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin:6px 0}
-.pill{padding:9px 16px;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:1px;
-  border:2px solid rgba(255,255,255,.15);background:var(--panel);color:var(--muted);
-  cursor:pointer;border-radius:6px;transition:all .18s;line-height:1.3;text-align:center}
-.pill.sel,.pill:hover{border-color:var(--gold);color:var(--gold);box-shadow:0 0 14px rgba(255,215,0,.3)}
-.op-pill{width:50px;height:50px;padding:0;display:flex;align-items:center;justify-content:center;font-size:22px;border-radius:10px}
-.op-pill.sel,.op-pill:hover{border-color:var(--success);color:var(--success);box-shadow:0 0 14px rgba(0,255,136,.3)}
+/* HP BARS */
+.hp-hud{flex-shrink:0;padding:10px 12px 6px;background:rgba(7,0,15,.85);border-bottom:2px solid rgba(255,255,255,.06);backdrop-filter:blur(10px)}
+.hp-row{display:flex;gap:10px;align-items:center;margin-bottom:4px}
+.hp-name{font-family:'Bangers',cursive;font-size:18px;letter-spacing:2px;min-width:80px;white-space:nowrap}
+.hp-name.p{color:var(--p1);text-align:left}.hp-name.e{color:var(--ec);text-align:right}
+.hp-bar-wrap{flex:1;height:18px;background:rgba(0,0,0,.6);border-radius:9px;overflow:hidden;border:2px solid rgba(255,255,255,.12);position:relative}
+.hp-bar{height:100%;border-radius:7px;transition:width .35s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}
+.hp-bar::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:rgba(255,255,255,.25);border-radius:7px}
+.hp-bar.p{background:linear-gradient(90deg,var(--p1d),var(--p1));box-shadow:0 0 10px rgba(0,212,255,.5)}
+.hp-bar.e{background:linear-gradient(270deg,var(--ecd),var(--ec));box-shadow:0 0 10px rgba(255,34,68,.5)}
+.hp-num{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-family:'Bangers',cursive;font-size:13px;color:rgba(255,255,255,.9);z-index:1;text-shadow:0 1px 3px rgba(0,0,0,.8)}
+.round-info{display:flex;justify-content:center;align-items:center;gap:10px}
+.round-num{font-family:'Bangers',cursive;font-size:15px;color:var(--gold);letter-spacing:2px}
+.timer-ring{position:relative;width:36px;height:36px}
+.timer-ring svg{width:100%;height:100%}
+#timerArc{transition:stroke-dashoffset .9s linear}
+.timer-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Bangers',cursive;font-size:14px;color:#fff}
+.combo-display{font-family:'Bangers',cursive;font-size:13px;color:var(--gold);letter-spacing:2px;min-width:80px;text-align:right}
 
-/* ── CUSTOM RANGE ── */
-.range-wrap{display:flex;gap:10px;justify-content:center;align-items:center;margin:8px 0;flex-wrap:wrap}
-.range-in{width:90px;padding:9px;font-family:'Orbitron',monospace;font-size:15px;font-weight:700;
-  text-align:center;background:var(--panel);border:2px solid rgba(255,255,255,.18);color:#fff;
-  border-radius:8px;outline:none;-webkit-appearance:none;appearance:none}
-.range-in:focus{border-color:var(--gold)}
+/* ARENA */
+.arena{flex-shrink:0;position:relative;height:200px;overflow:hidden}
+.arena-bg{position:absolute;inset:0}
+.arena-floor{position:absolute;bottom:0;left:0;right:0;height:60px;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.5))}
+.arena-crowd{position:absolute;top:0;left:0;right:0;height:80px;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.015) 0,rgba(255,255,255,.015) 2px,transparent 2px,transparent 18px)}
+.arena-lights{position:absolute;inset:0;pointer-events:none}
+.arena-light{position:absolute;top:-20px;width:80px;height:200px;border-radius:0 0 60px 60px;
+  opacity:.06;animation:lightSway 3s ease-in-out infinite alternate}
+.arena-light:nth-child(1){left:15%;background:var(--p1);animation-delay:0s}
+.arena-light:nth-child(2){left:45%;background:#fff;animation-delay:.5s}
+.arena-light:nth-child(3){right:15%;background:var(--ec);animation-delay:1s}
+@keyframes lightSway{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+.arena-fighters{display:flex;justify-content:space-between;align-items:flex-end;position:absolute;
+  bottom:8px;left:0;right:0;padding:0 16px}
 
-/* ── HUD ── */
-.hud{width:100%;background:rgba(6,6,18,.8);backdrop-filter:blur(12px);padding:10px 14px;
-  display:flex;align-items:center;justify-content:space-between;
-  border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;z-index:20;flex-shrink:0}
-.hud-side{display:flex;flex-direction:column}
-.hud-side.right{align-items:flex-end}
-.hud-label{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1px;opacity:.6}
-.hud-score{font-family:'Orbitron',monospace;font-size:22px;font-weight:900;line-height:1}
-.hud-center{display:flex;flex-direction:column;align-items:center}
-.hud-timer{font-family:'Orbitron',monospace;font-size:26px;font-weight:900;color:var(--gold);min-width:55px;text-align:center;line-height:1}
-.hud-mode{font-size:9px;color:var(--muted);letter-spacing:2px;margin-top:2px}
+/* ═════════════════════════════════════
+   CSS HUMAN CHARACTERS
+═════════════════════════════════════ */
+.fighter{position:relative;width:110px;height:185px;flex-shrink:0}
+.f-shadow{position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:70px;height:10px;background:rgba(0,0,0,.5);border-radius:50%;filter:blur(3px);
+  animation:shadowPulse 1.2s ease-in-out infinite alternate}
+@keyframes shadowPulse{from{transform:translateX(-50%) scaleX(1)}to{transform:translateX(-50%) scaleX(.85)}}
 
-/* ── ROPE ARENA ── */
-.rope-arena{width:100%;padding:14px 14px 6px;flex-shrink:0}
-.fighters{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px;padding:0 4px}
-.fighter{font-size:38px;line-height:1;filter:drop-shadow(0 0 10px var(--player));transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
-.fighter.enemy{filter:drop-shadow(0 0 10px var(--enemy))}
-.rope-track{width:100%;height:22px;background:rgba(255,255,255,.05);border-radius:11px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
-.rope-fl{position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,var(--player),rgba(0,245,255,.5));border-radius:11px;transition:width .45s cubic-bezier(.34,1.56,.64,1)}
-.rope-fr{position:absolute;top:0;right:0;height:100%;background:linear-gradient(270deg,var(--enemy),rgba(255,51,102,.5));border-radius:11px;transition:width .45s cubic-bezier(.34,1.56,.64,1)}
-.rope-mid{position:absolute;top:0;left:50%;width:2px;height:100%;background:rgba(255,255,255,.25);transform:translateX(-50%)}
-.rope-knot{position:absolute;top:50%;transform:translate(-50%,-50%);width:30px;height:30px;
-  background:var(--gold);border-radius:50%;border:3px solid #fff;
-  box-shadow:0 0 18px var(--gold),0 0 6px rgba(0,0,0,.5);
-  transition:left .45s cubic-bezier(.34,1.56,.64,1);z-index:2;
-  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#000;font-family:'Orbitron',monospace}
-.rope-labels{display:flex;justify-content:space-between;margin-top:4px}
-.rope-lbl{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1px;opacity:.55}
+/* BODY GROUP */
+.f-body{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);width:90px;
+  animation:idleBob 1.3s ease-in-out infinite}
+@keyframes idleBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-5px)}}
+.fighter.hit .f-body{animation:hitRecoil .35s ease-out;animation-fill-mode:forwards}
+@keyframes hitRecoil{0%{transform:translateX(-50%) translateY(0) rotate(0)}30%{transform:translateX(calc(-50% + 12px)) translateY(-4px) rotate(5deg)}100%{transform:translateX(-50%) translateY(0) rotate(0)}}
+.fighter.enemy.hit .f-body{animation:hitRecoilE .35s ease-out;animation-fill-mode:forwards}
+@keyframes hitRecoilE{0%{transform:translateX(-50%) translateY(0)}30%{transform:translateX(calc(-50% - 12px)) translateY(-4px)}100%{transform:translateX(-50%) translateY(0)}}
+.fighter.punch .f-body{animation:punchLean .3s ease-out;animation-fill-mode:forwards}
+@keyframes punchLean{0%,100%{transform:translateX(-50%)}40%{transform:translateX(calc(-50% + 14px))}}
+.fighter.kick .f-body{animation:kickLean .4s ease-out;animation-fill-mode:forwards}
+@keyframes kickLean{0%,100%{transform:translateX(-50%)}35%{transform:translateX(calc(-50% + 10px)) translateY(-6px)}}
+.fighter.special .f-body{animation:specialAttack .5s ease-out;animation-fill-mode:forwards}
+@keyframes specialAttack{0%{transform:translateX(-50%) scale(1)}20%{transform:translateX(-50%) scale(1.1) translateY(-12px)}50%{transform:translateX(calc(-50% + 22px)) scale(1.05) translateY(-6px)}100%{transform:translateX(-50%) scale(1)}}
 
-/* ── POWER BAR ── */
-.power-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;flex-shrink:0;flex-wrap:wrap;gap:8px}
-.streak-wrap{display:flex;align-items:center;gap:6px}
-.streak-num{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;color:var(--gold)}
-.streak-badge{font-size:10px;color:var(--success);background:rgba(0,255,136,.12);padding:2px 7px;border-radius:10px;border:1px solid var(--success);font-weight:700}
-.pups{display:flex;gap:6px}
-.pup{width:42px;height:42px;border:2px solid rgba(255,255,255,.18);background:var(--panel);border-radius:9px;
-  font-size:18px;cursor:pointer;transition:all .18s;position:relative;display:flex;align-items:center;justify-content:center}
-.pup:not(.off):hover{border-color:var(--gold);box-shadow:0 0 14px rgba(255,215,0,.4);transform:scale(1.1)}
-.pup.off{opacity:.3;cursor:not-allowed}
-.pup-cnt{position:absolute;top:-7px;right:-7px;width:17px;height:17px;background:var(--danger);color:#fff;border-radius:50%;
-  font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace}
+/* LEGS */
+.f-leg-back{position:absolute;bottom:0;left:28px;width:17px;height:72px;z-index:1}
+.f-thigh{width:17px;height:38px;border-radius:9px 9px 5px 5px;position:absolute;top:0}
+.f-shin{width:15px;height:35px;border-radius:5px 5px 8px 8px;position:absolute;top:34px;left:1px}
+.f-foot{position:absolute;bottom:-4px;left:-4px;width:26px;height:11px;border-radius:8px 8px 6px 6px}
+.f-leg-front{position:absolute;bottom:0;right:28px;width:17px;height:72px;z-index:3}
+.fighter.kick .f-leg-front{animation:kickAnim .4s ease-out;transform-origin:top center}
+@keyframes kickAnim{0%{transform:rotate(5deg)}35%{transform:rotate(-65deg) translateY(-5px)}100%{transform:rotate(5deg)}}
+/* walk sway on legs */
+.fighter .f-leg-back .f-thigh,.fighter .f-leg-front .f-thigh{animation:legSway 1.3s ease-in-out infinite}
+.fighter .f-leg-back .f-thigh{animation-delay:.65s}
+@keyframes legSway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
 
-/* ── QUESTION ── */
-.q-area{padding:8px 14px 4px;text-align:center;flex-shrink:0}
-.q-display{font-family:'Orbitron',monospace;font-size:clamp(28px,9vw,54px);font-weight:900;color:#fff;
-  text-shadow:0 0 24px rgba(255,255,255,.3);min-height:60px;display:flex;align-items:center;justify-content:center;line-height:1}
-.q-hint{font-size:11px;color:var(--muted);letter-spacing:3px;margin-top:2px;min-height:18px}
-.lives-row{display:flex;gap:4px;justify-content:center;margin-bottom:4px}
-.life-h{font-size:20px;transition:all .3s}
-.life-h.gone{opacity:.18;filter:grayscale(1)}
+/* TORSO */
+.f-torso{position:absolute;bottom:68px;left:50%;transform:translateX(-50%);width:52px;height:58px;border-radius:10px 10px 12px 12px;z-index:2}
+.f-collar{position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:18px solid rgba(255,255,255,.2)}
+.f-torso-badge{position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  font-size:10px;background:rgba(255,255,255,.15);padding:2px 6px;border-radius:4px;color:rgba(255,255,255,.7);white-space:nowrap}
+.f-belt{position:absolute;bottom:66px;left:50%;transform:translateX(-50%);width:54px;height:9px;border-radius:4px;z-index:3}
+.f-belt-buckle{position:absolute;left:50%;transform:translateX(-50%);top:-1px;width:11px;height:11px;border-radius:2px;border:2px solid rgba(255,255,255,.4)}
 
-/* ── OPTIONS ── */
-.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:8px 14px 14px;max-width:480px;margin:0 auto;width:100%}
-.opt{padding:15px 8px;font-family:'Orbitron',monospace;font-size:clamp(16px,5.5vw,24px);font-weight:700;
-  border:2px solid rgba(255,255,255,.15);background:var(--panel2);color:#fff;cursor:pointer;
-  border-radius:12px;transition:all .15s;position:relative;overflow:hidden;min-height:58px;
-  display:flex;align-items:center;justify-content:center}
-.opt:not([disabled]):hover{border-color:var(--player);box-shadow:0 0 18px rgba(0,245,255,.3);transform:translateY(-3px)}
-.opt:active{transform:scale(.95)}
-.opt.ok{background:rgba(0,255,136,.18);border-color:var(--success);box-shadow:0 0 22px rgba(0,255,136,.5);color:var(--success)}
-.opt.ng{background:rgba(255,68,85,.18);border-color:var(--danger);box-shadow:0 0 22px rgba(255,68,85,.5);color:var(--danger)}
-.opt[disabled]{cursor:not-allowed}
+/* ARMS */
+.f-arm-back{position:absolute;bottom:100px;left:6px;width:14px;height:44px;border-radius:7px;
+  transform-origin:top center;transform:rotate(20deg);z-index:1}
+.f-arm-back .f-forearm-b{position:absolute;top:36px;left:1px;width:12px;height:34px;border-radius:6px;
+  transform-origin:top center;transform:rotate(-15deg)}
+.f-arm-back .f-fist-b{position:absolute;bottom:-8px;left:-2px;width:16px;height:15px;border-radius:5px}
+.f-arm-front{position:absolute;bottom:100px;right:4px;width:14px;height:44px;border-radius:7px;
+  transform-origin:top center;transform:rotate(-20deg);z-index:4}
+.f-arm-front .f-forearm-f{position:absolute;top:36px;left:1px;width:12px;height:34px;border-radius:6px;
+  transform-origin:top center;transform:rotate(12deg)}
+.f-arm-front .f-fist-f{position:absolute;bottom:-8px;left:-1px;width:17px;height:15px;border-radius:5px}
+.fighter.punch .f-arm-front{animation:punchArm .3s ease-out;animation-fill-mode:forwards}
+@keyframes punchArm{0%{transform:rotate(-20deg)}35%{transform:rotate(-75deg) translateX(8px)}100%{transform:rotate(-20deg)}}
+.fighter.special .f-arm-front{animation:specialArm .5s ease-out;animation-fill-mode:forwards}
+@keyframes specialArm{0%{transform:rotate(-20deg)}30%{transform:rotate(-100deg) translateX(14px)}100%{transform:rotate(-20deg)}}
+/* Idle arm sway */
+.fighter .f-arm-front{animation:armSway 1.3s ease-in-out infinite}
+.fighter .f-arm-back{animation:armSway 1.3s ease-in-out infinite;animation-delay:.65s}
+@keyframes armSway{0%,100%{transform:rotate(-20deg)}50%{transform:rotate(-10deg)}}
+.fighter.punch .f-arm-front{animation:punchArm .3s ease-out forwards}
+.fighter.kick .f-arm-back,.fighter.kick .f-arm-front{animation:armKickBalance .4s ease-out forwards}
+@keyframes armKickBalance{0%,100%{transform:rotate(-20deg)}35%{transform:rotate(-50deg)}}
 
-/* ── PVP INPUTS ── */
-.pvp-wrap{display:flex;gap:12px;padding:8px 14px 14px;width:100%;max-width:480px;margin:0 auto}
-.pvp-group{flex:1;display:flex;flex-direction:column;gap:6px}
-.pvp-lbl{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;text-align:center;font-weight:700}
-.pvp-in{width:100%;padding:12px;font-family:'Orbitron',monospace;font-size:22px;font-weight:700;
-  text-align:center;background:var(--panel);border:2px solid;color:#fff;border-radius:10px;outline:none;
-  -webkit-appearance:none;appearance:none}
+/* NECK */
+.f-neck{position:absolute;bottom:124px;left:50%;transform:translateX(-50%);width:14px;height:14px;border-radius:5px;z-index:2}
+/* HEAD */
+.f-head{position:absolute;bottom:132px;left:50%;transform:translateX(-50%);z-index:5;width:48px;height:52px}
+.f-face{width:48px;height:52px;border-radius:50% 50% 45% 45%;position:relative}
+.f-hair-top{position:absolute;top:-12px;left:-2px;width:52px;height:28px;border-radius:50% 50% 0 0;z-index:1}
+.f-hair-side-l{position:absolute;top:0;left:-6px;width:10px;height:24px;border-radius:8px 0 0 8px}
+.f-hair-side-r{position:absolute;top:0;right:-6px;width:10px;height:24px;border-radius:0 8px 8px 0}
+.f-ear-l{position:absolute;top:14px;left:-5px;width:8px;height:10px;border-radius:50%}
+.f-ear-r{position:absolute;top:14px;right:-5px;width:8px;height:10px;border-radius:50%}
+.f-eyebrow-l,.f-eyebrow-r{position:absolute;top:12px;width:13px;height:3px;border-radius:2px}
+.f-eyebrow-l{left:6px;transform:rotate(-8deg)}.f-eyebrow-r{right:6px;transform:rotate(8deg)}
+.f-eye-l,.f-eye-r{position:absolute;top:18px;width:11px;height:11px;border-radius:50%;background:#fff}
+.f-eye-l{left:6px}.f-eye-r{right:6px}
+.f-pupil{width:7px;height:7px;border-radius:50%;background:#111;position:absolute;top:2px;left:2px}
+.f-pupil::after{content:'';position:absolute;width:2.5px;height:2.5px;border-radius:50%;background:#fff;top:0;left:1px}
+.f-nose{position:absolute;top:28px;left:50%;transform:translateX(-50%);width:8px;height:6px;
+  border-left:2px solid rgba(0,0,0,.2);border-bottom:2px solid rgba(0,0,0,.2);border-radius:0 0 4px 4px}
+.f-mouth{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:16px;height:7px;
+  border-bottom:2.5px solid rgba(150,60,40,.7);border-radius:0 0 8px 8px}
+.f-mouth.smile{border-bottom:2.5px solid rgba(180,60,40,.9);width:18px}
+.f-mouth.ouch{border-top:2.5px solid rgba(150,60,40,.7);border-bottom:none;border-radius:8px 8px 0 0;height:5px}
+/* head animation */
+.fighter .f-head{animation:headBob 1.3s ease-in-out infinite}
+@keyframes headBob{0%,100%{transform:translateX(-50%) rotate(-2deg)}50%{transform:translateX(-50%) rotate(2deg)}}
+.fighter.hit .f-head{animation:headShake .35s ease-out}
+@keyframes headShake{0%,100%{transform:translateX(-50%)}25%{transform:translateX(calc(-50% + 8px))}75%{transform:translateX(calc(-50% - 6px))}}
 
-/* ── AI THINKING ── */
-.ai-thinking{display:flex;gap:5px;align-items:center;justify-content:center;padding:6px}
-.ai-dot{width:9px;height:9px;border-radius:50%;background:var(--enemy);animation:aipulse .8s infinite}
-.ai-dot:nth-child(2){animation-delay:.2s}.ai-dot:nth-child(3){animation-delay:.4s}
-@keyframes aipulse{0%,100%{transform:scale(1);opacity:.3}50%{transform:scale(1.5);opacity:1}}
+/* FLASH + GLOW EFFECTS */
+.fighter.hit .f-face,.fighter.hit .f-arm-back,.fighter.hit .f-arm-front,
+.fighter.hit .f-torso,.fighter.hit .f-leg-back .f-thigh,.fighter.hit .f-leg-front .f-thigh{
+  filter:brightness(3) hue-rotate(0deg);animation:hitFlash .3s ease-out}
+@keyframes hitFlash{0%,100%{filter:brightness(1)}50%{filter:brightness(4) saturate(0)}}
+.fighter.special .f-torso{box-shadow:0 0 30px 10px rgba(255,220,0,.6);animation:specialGlow .5s ease-out}
+@keyframes specialGlow{0%,100%{filter:brightness(1)}30%{filter:brightness(2) saturate(2)}}
+.fighter.win-anim .f-arm-front,.fighter.win-anim .f-arm-back{animation:winArms .5s ease-in-out infinite alternate}
+@keyframes winArms{from{transform:rotate(-60deg)}to{transform:rotate(-120deg)}}
+.fighter.win-anim .f-body{animation:winJump .5s ease-in-out infinite alternate}
+@keyframes winJump{from{transform:translateX(-50%) translateY(0)}to{transform:translateX(-50%) translateY(-18px)}}
+.fighter.ko .f-body{animation:koDrop .6s ease-in forwards}
+@keyframes koDrop{to{transform:translateX(-50%) rotate(85deg) translateY(10px);transform-origin:bottom center}}
 
-/* ── PROGRESS BAR ── */
-.timebar{width:100%;height:4px;background:rgba(255,255,255,.08);position:fixed;top:0;left:0;z-index:100;display:none}
-.timebar-fill{height:100%;background:linear-gradient(90deg,var(--player),var(--gold));transition:width 1s linear}
+/* ENEMY MIRROR */
+.fighter.enemy{transform:scaleX(-1)}
+.fighter.enemy .f-torso-badge,.fighter.enemy .cc-nm{transform:scaleX(-1)}
 
-/* ── RESULT ── */
-.result-box{background:var(--panel);border-radius:22px;padding:28px 22px;width:100%;max-width:380px;
-  text-align:center;border:1px solid rgba(255,255,255,.08);box-shadow:0 24px 70px rgba(0,0,0,.6)}
-.res-emoji{font-size:60px;display:block;margin-bottom:10px;animation:bounceIn .5s ease}
-.res-title{font-family:'Orbitron',monospace;font-size:clamp(16px,5vw,26px);font-weight:900;margin-bottom:16px}
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
-.stat-box{background:rgba(255,255,255,.04);border-radius:10px;padding:12px 8px}
-.stat-lbl{font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:4px;text-transform:uppercase}
-.stat-val{font-family:'Orbitron',monospace;font-size:22px;font-weight:900;color:var(--gold)}
-.name-wrap{margin:12px 0}
-.name-lbl{font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:6px}
-.name-in{width:100%;padding:10px;font-family:'Orbitron',monospace;font-size:16px;text-align:center;
-  background:var(--panel);border:2px solid var(--gold);color:#fff;border-radius:8px;outline:none;text-transform:uppercase}
+/* ─── PLAYER COLORS ─── */
+/* Player 1 - Arjun (blue) */
+.p-arjun .f-hair-top,.p-arjun .f-hair-side-l,.p-arjun .f-hair-side-r{background:#1a0a00}
+.p-arjun .f-face,.p-arjun .f-neck,.p-arjun .f-ear-l,.p-arjun .f-ear-r{background:var(--skin)}
+.p-arjun .f-eyebrow-l,.p-arjun .f-eyebrow-r{background:#1a0a00}
+.p-arjun .f-torso,.p-arjun .f-arm-back,.p-arjun .f-arm-front,.p-arjun .f-forearm-b,.p-arjun .f-forearm-f{background:#1155dd}
+.p-arjun .f-belt{background:#cc9900}.p-arjun .f-belt-buckle{background:#ffd700}
+.p-arjun .f-leg-back .f-thigh,.p-arjun .f-leg-front .f-thigh{background:#1144aa}
+.p-arjun .f-leg-back .f-shin,.p-arjun .f-leg-front .f-shin{background:#0d3380}
+.p-arjun .f-leg-back .f-foot,.p-arjun .f-leg-front .f-foot{background:#1a1a1a}
+.p-arjun .f-fist-b,.p-arjun .f-fist-f{background:var(--skin)}
 
-/* ── LEADERBOARD ── */
-.lb-filters{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
-.lb-list{width:100%;max-width:420px}
-.lb-item{display:flex;align-items:center;padding:11px 14px;margin:5px 0;
-  background:var(--panel);border-radius:11px;border:1px solid rgba(255,255,255,.06);gap:10px;transition:border-color .2s}
-.lb-item:hover{border-color:rgba(255,255,255,.15)}
-.lb-rank{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;min-width:28px}
-.lb-rank.r1{color:#ffd700}.lb-rank.r2{color:#c0c0c0}.lb-rank.r3{color:#cd7f32}
-.lb-info{flex:1}
-.lb-name{font-weight:700;font-size:14px}
-.lb-meta{font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:1px}
-.lb-right{text-align:right}
-.lb-score{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:var(--player)}
-.lb-mini{font-size:10px;color:var(--muted)}
+/* Player 2 - Priya (green) */
+.p-priya .f-hair-top,.p-priya .f-hair-side-l,.p-priya .f-hair-side-r{background:#0a0020}
+.p-priya .f-face,.p-priya .f-neck,.p-priya .f-ear-l,.p-priya .f-ear-r{background:#f5c5a3}
+.p-priya .f-eyebrow-l,.p-priya .f-eyebrow-r{background:#0a0020}
+.p-priya .f-torso,.p-priya .f-arm-back,.p-priya .f-arm-front,.p-priya .f-forearm-b,.p-priya .f-forearm-f{background:#00aa44}
+.p-priya .f-belt{background:#884400}.p-priya .f-belt-buckle{background:#cc6600}
+.p-priya .f-leg-back .f-thigh,.p-priya .f-leg-front .f-thigh{background:#007733}
+.p-priya .f-leg-back .f-shin,.p-priya .f-leg-front .f-shin{background:#005522}
+.p-priya .f-leg-back .f-foot,.p-priya .f-leg-front .f-foot{background:#1a1a1a}
+.p-priya .f-fist-b,.p-priya .f-fist-f{background:#f5c5a3}
+/* Ponytail for Priya */
+.p-priya .f-hair-top{clip-path:polygon(0 0,100% 0,100% 100%,50% 60%,0 100%)}
 
-/* ── DAILY BADGE ── */
-.daily-badge{display:inline-block;padding:5px 14px;border-radius:20px;font-family:'Orbitron',monospace;
-  font-size:10px;font-weight:700;letter-spacing:2px;margin-bottom:8px;
-  background:linear-gradient(135deg,#ff6b35,#ffd700);color:#000}
+/* Player 3 - Vikram (orange) */
+.p-vikram .f-hair-top,.p-vikram .f-hair-side-l,.p-vikram .f-hair-side-r{background:#2a1a00}
+.p-vikram .f-face,.p-vikram .f-neck,.p-vikram .f-ear-l,.p-vikram .f-ear-r{background:#e8a070}
+.p-vikram .f-eyebrow-l,.p-vikram .f-eyebrow-r{background:#2a1a00}
+.p-vikram .f-torso,.p-vikram .f-arm-back,.p-vikram .f-arm-front,.p-vikram .f-forearm-b,.p-vikram .f-forearm-f{background:#dd4400}
+.p-vikram .f-belt{background:#1a1a1a}.p-vikram .f-belt-buckle{background:#555}
+.p-vikram .f-leg-back .f-thigh,.p-vikram .f-leg-front .f-thigh{background:#222}
+.p-vikram .f-leg-back .f-shin,.p-vikram .f-leg-front .f-shin{background:#111}
+.p-vikram .f-leg-back .f-foot,.p-vikram .f-leg-front .f-foot{background:#1a1a1a}
+.p-vikram .f-fist-b,.p-vikram .f-fist-f{background:#e8a070}
+/* Short hair for Vikram */
+.p-vikram .f-hair-top{border-radius:50% 50% 20% 20%;height:20px}
 
-/* ── BACK BTN ── */
-.back-btn{position:absolute;top:14px;left:14px;font-family:'Orbitron',monospace;font-size:10px;color:var(--muted);
-  background:none;border:none;cursor:pointer;letter-spacing:1px;padding:6px;transition:color .2s;z-index:5}
-.back-btn:hover{color:#fff}
+/* ─── ENEMY COLORS ─── */
+.e-raju .f-hair-top,.e-raju .f-hair-side-l,.e-raju .f-hair-side-r{background:#111}
+.e-raju .f-face,.e-raju .f-neck,.e-raju .f-ear-l,.e-raju .f-ear-r{background:#f0b090}
+.e-raju .f-eyebrow-l,.e-raju .f-eyebrow-r{background:#111}
+.e-raju .f-torso,.e-raju .f-arm-back,.e-raju .f-arm-front,.e-raju .f-forearm-b,.e-raju .f-forearm-f{background:#cc1122}
+.e-raju .f-belt{background:#660000}.e-raju .f-belt-buckle{background:#880000}
+.e-raju .f-leg-back .f-thigh,.e-raju .f-leg-front .f-thigh{background:#441100}
+.e-raju .f-leg-back .f-shin,.e-raju .f-leg-front .f-shin{background:#330d00}
+.e-raju .f-leg-back .f-foot,.e-raju .f-leg-front .f-foot{background:#222}
+.e-raju .f-fist-b,.e-raju .f-fist-f{background:#f0b090}
 
-/* ── FLASH OVERLAY ── */
-.flash{position:fixed;inset:0;pointer-events:none;z-index:200;opacity:0;transition:opacity .25s}
-.flash.ok-f{background:rgba(0,255,136,.1)}
-.flash.ng-f{background:rgba(255,68,85,.13)}
-.flash.on{opacity:1}
-.freeze-frame{position:fixed;inset:0;pointer-events:none;z-index:190;display:none;
-  border:3px solid var(--player);background:rgba(0,245,255,.04)}
-.freeze-frame.on{display:block}
+.e-priya2 .f-hair-top,.e-priya2 .f-hair-side-l,.e-priya2 .f-hair-side-r{background:#330033}
+.e-priya2 .f-face,.e-priya2 .f-neck,.e-priya2 .f-ear-l,.e-priya2 .f-ear-r{background:#f0c8b0}
+.e-priya2 .f-eyebrow-l,.e-priya2 .f-eyebrow-r{background:#330033}
+.e-priya2 .f-torso,.e-priya2 .f-arm-back,.e-priya2 .f-arm-front,.e-priya2 .f-forearm-b,.e-priya2 .f-forearm-f{background:#9933cc}
+.e-priya2 .f-belt{background:#661199}.e-priya2 .f-belt-buckle{background:#aa44ff}
+.e-priya2 .f-leg-back .f-thigh,.e-priya2 .f-leg-front .f-thigh{background:#440088}
+.e-priya2 .f-leg-back .f-shin,.e-priya2 .f-leg-front .f-shin{background:#220055}
+.e-priya2 .f-leg-back .f-foot,.e-priya2 .f-leg-front .f-foot{background:#1a1a2e}
+.e-priya2 .f-fist-b,.e-priya2 .f-fist-f{background:#f0c8b0}
+.e-priya2 .f-hair-top{clip-path:polygon(0 0,100% 0,100% 100%,50% 60%,0 100%)}
 
-/* ── POPUP SCORE ── */
-.spop{position:fixed;font-family:'Orbitron',monospace;font-size:22px;font-weight:900;
-  pointer-events:none;z-index:300;animation:sfloat 1.2s ease forwards}
-@keyframes sfloat{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-55px) scale(.8)}}
+.e-rocky .f-hair-top,.e-rocky .f-hair-side-l,.e-rocky .f-hair-side-r{background:#1a0a00}
+.e-rocky .f-face,.e-rocky .f-neck,.e-rocky .f-ear-l,.e-rocky .f-ear-r{background:#d4895a}
+.e-rocky .f-eyebrow-l,.e-rocky .f-eyebrow-r{background:#1a0a00}
+.e-rocky .f-torso,.e-rocky .f-arm-back,.e-rocky .f-arm-front,.e-rocky .f-forearm-b,.e-rocky .f-forearm-f{background:#dd6600}
+.e-rocky .f-belt{background:#222}.e-rocky .f-belt-buckle{background:#888}
+.e-rocky .f-leg-back .f-thigh,.e-rocky .f-leg-front .f-thigh{background:#111}
+.e-rocky .f-leg-back .f-shin,.e-rocky .f-leg-front .f-shin{background:#0a0a0a}
+.e-rocky .f-leg-back .f-foot,.e-rocky .f-leg-front .f-foot{background:#1a0a00}
+.e-rocky .f-fist-b,.e-rocky .f-fist-f{background:#d4895a}
+/* Bigger torso for Rocky */
+.e-rocky .f-torso{width:58px;border-radius:14px 14px 14px 14px}
 
-/* ── TOAST ── */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
-  background:var(--panel2);border:1px solid rgba(255,255,255,.18);color:#fff;
-  padding:9px 20px;border-radius:30px;font-family:'Orbitron',monospace;font-size:11px;letter-spacing:1px;
-  z-index:400;animation:toastA 2.6s ease forwards;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-@keyframes toastA{0%{opacity:0;transform:translateX(-50%) translateY(16px)}15%{opacity:1;transform:translateX(-50%)}80%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-8px)}}
+.e-verma .f-hair-top,.e-verma .f-hair-side-l,.e-verma .f-hair-side-r{background:#aaa}
+.e-verma .f-face,.e-verma .f-neck,.e-verma .f-ear-l,.e-verma .f-ear-r{background:#f5d5b5}
+.e-verma .f-eyebrow-l,.e-verma .f-eyebrow-r{background:#888}
+.e-verma .f-torso,.e-verma .f-arm-back,.e-verma .f-arm-front,.e-verma .f-forearm-b,.e-verma .f-forearm-f{background:#1a6e1a}
+.e-verma .f-belt{background:#114411}.e-verma .f-belt-buckle{background:#55aa55}
+.e-verma .f-leg-back .f-thigh,.e-verma .f-leg-front .f-thigh{background:#1a1a4a}
+.e-verma .f-leg-back .f-shin,.e-verma .f-leg-front .f-shin{background:#111133}
+.e-verma .f-leg-back .f-foot,.e-verma .f-leg-front .f-foot{background:#1a1a1a}
+.e-verma .f-fist-b,.e-verma .f-fist-f{background:#f5d5b5}
+/* Grey hair for older professor */
+.e-verma .f-hair-top{background:#cccccc}
 
-/* ── ANIMATIONS ── */
-@keyframes bounceIn{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
-@keyframes slideUp{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
-@keyframes glow-pulse{0%,100%{box-shadow:0 0 10px var(--gold)}50%{box-shadow:0 0 30px var(--gold),0 0 60px rgba(255,215,0,.4)}}
-.slide-up{animation:slideUp .4s ease forwards}
-.shake{animation:shake .4s ease}
+.e-cyber .f-hair-top,.e-cyber .f-hair-side-l,.e-cyber .f-hair-side-r{background:#00ffff}
+.e-cyber .f-face,.e-cyber .f-neck,.e-cyber .f-ear-l,.e-cyber .f-ear-r{background:#aaeeee}
+.e-cyber .f-eyebrow-l,.e-cyber .f-eyebrow-r{background:#00cccc}
+.e-cyber .f-torso,.e-cyber .f-arm-back,.e-cyber .f-arm-front,.e-cyber .f-forearm-b,.e-cyber .f-forearm-f{background:#0055aa}
+.e-cyber .f-belt{background:#003388}.e-cyber .f-belt-buckle{background:#00d4ff}
+.e-cyber .f-leg-back .f-thigh,.e-cyber .f-leg-front .f-thigh{background:#003366}
+.e-cyber .f-leg-back .f-shin,.e-cyber .f-leg-front .f-shin{background:#002244}
+.e-cyber .f-leg-back .f-foot,.e-cyber .f-leg-front .f-foot{background:#0a0a2a}
+.e-cyber .f-fist-b,.e-cyber .f-fist-f{background:#aaeeee}
+/* Cyber grid lines */
+.e-cyber .f-torso::after{content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,rgba(0,212,255,.15) 0,rgba(0,212,255,.15) 1px,transparent 1px,transparent 8px);
+  border-radius:inherit}
 
-/* ── GAME SCREEN LAYOUT ── */
-#gameScreen{padding:0;justify-content:flex-start;overflow-y:auto}
-.game-body{display:flex;flex-direction:column;width:100%;min-height:calc(100% - 56px)}
+.e-grandmaster .f-hair-top,.e-grandmaster .f-hair-side-l,.e-grandmaster .f-hair-side-r{background:#ffd700}
+.e-grandmaster .f-face,.e-grandmaster .f-neck,.e-grandmaster .f-ear-l,.e-grandmaster .f-ear-r{background:#f0d080}
+.e-grandmaster .f-eyebrow-l,.e-grandmaster .f-eyebrow-r{background:#884400}
+.e-grandmaster .f-torso,.e-grandmaster .f-arm-back,.e-grandmaster .f-arm-front,.e-grandmaster .f-forearm-b,.e-grandmaster .f-forearm-f{background:#aa7700}
+.e-grandmaster .f-belt{background:#ffd700}.e-grandmaster .f-belt-buckle{background:#ffaa00}
+.e-grandmaster .f-leg-back .f-thigh,.e-grandmaster .f-leg-front .f-thigh{background:#884400}
+.e-grandmaster .f-leg-back .f-shin,.e-grandmaster .f-leg-front .f-shin{background:#662200}
+.e-grandmaster .f-leg-back .f-foot,.e-grandmaster .f-leg-front .f-foot{background:#1a0a00}
+.e-grandmaster .f-fist-b,.e-grandmaster .f-fist-f{background:#f0d080}
+.e-grandmaster .f-torso{box-shadow:0 0 14px rgba(255,215,0,.3);animation:goldGlow 1.5s ease-in-out infinite alternate}
+@keyframes goldGlow{from{box-shadow:0 0 8px rgba(255,215,0,.2)}to{box-shadow:0 0 24px rgba(255,215,0,.6)}}
 
-/* ── RESPONSIVE ── */
-@media(max-width:360px){.opts-grid{gap:7px}.opt{padding:12px 6px;font-size:14px;min-height:50px}.mode-grid{gap:8px}.pup{width:38px;height:38px;font-size:16px}}
-@media(min-height:740px){.q-display{min-height:70px}}
+.e-mathgod .f-hair-top,.e-mathgod .f-hair-side-l,.e-mathgod .f-hair-side-r{background:#cc00ff}
+.e-mathgod .f-face,.e-mathgod .f-neck,.e-mathgod .f-ear-l,.e-mathgod .f-ear-r{background:#ccaaee}
+.e-mathgod .f-eyebrow-l,.e-mathgod .f-eyebrow-r{background:#660099}
+.e-mathgod .f-torso,.e-mathgod .f-arm-back,.e-mathgod .f-arm-front,.e-mathgod .f-forearm-b,.e-mathgod .f-forearm-f{background:#220044}
+.e-mathgod .f-belt{background:#440088}.e-mathgod .f-belt-buckle{background:#cc00ff}
+.e-mathgod .f-leg-back .f-thigh,.e-mathgod .f-leg-front .f-thigh{background:#1a0033}
+.e-mathgod .f-leg-back .f-shin,.e-mathgod .f-leg-front .f-shin{background:#110022}
+.e-mathgod .f-leg-back .f-foot,.e-mathgod .f-leg-front .f-foot{background:#0a0010}
+.e-mathgod .f-fist-b,.e-mathgod .f-fist-f{background:#ccaaee}
+.e-mathgod .f-body{animation:idleBob 1.3s ease-in-out infinite,godFloat 2s ease-in-out infinite alternate!important}
+@keyframes godFloat{from{filter:drop-shadow(0 0 8px rgba(200,0,255,.4))}to{filter:drop-shadow(0 0 28px rgba(200,0,255,.9))}}
+
+/* ARENA BACKGROUNDS */
+.arena-bg.bg-village{background:linear-gradient(180deg,#87ceeb 0%,#b8d4e8 40%,#8B7355 40%,#6B5233 100%)}
+.arena-bg.bg-school{background:linear-gradient(180deg,#ffa500 0%,#ff8c00 30%,#c8a050 30%,#a07038 100%)}
+.arena-bg.bg-gym{background:linear-gradient(180deg,#1a1a2e 0%,#16213e 50%,#333 50%,#222 100%)}
+.arena-bg.bg-classroom{background:linear-gradient(180deg,#003366 0%,#004488 40%,#2244aa 40%,#1133aa 100%)}
+.arena-bg.bg-cyber{background:linear-gradient(180deg,#000511 0%,#001133 40%,#001122 40%,#000a11 100%)}
+.arena-bg.bg-stadium{background:linear-gradient(180deg,#0a0005 0%,#1a0010 40%,#220000 40%,#110000 100%)}
+.arena-bg.bg-final{background:radial-gradient(ellipse at 50% 30%,#330022 0%,#110011 50%,#07000f 100%)}
+
+/* HEALTH SHAKE */
+@keyframes hpShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.shaking{animation:hpShake .35s ease-out}
+
+/* ─── POWER-UPS ─── */
+.pu-row{display:flex;gap:8px;justify-content:center;padding:5px 10px;flex-shrink:0}
+.pub{width:48px;height:48px;border-radius:13px;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.15);
+  font-size:20px;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;flex-shrink:0}
+.pub:not(.off):hover{border-color:var(--gold);box-shadow:0 0 16px rgba(255,215,0,.4);transform:scale(1.12)}
+.pub:active{transform:scale(.9)}
+.pub.off{opacity:.25;cursor:not-allowed}
+.pub-cnt{position:absolute;top:-7px;right:-7px;width:18px;height:18px;border-radius:50%;
+  background:#ff2244;color:#fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);font-family:'Bangers',cursive}
+.pub.glowing{border-color:var(--gold)!important;box-shadow:0 0 24px rgba(255,215,0,.7);animation:puGl .5s infinite alternate}
+@keyframes puGl{from{box-shadow:0 0 12px rgba(255,215,0,.5)}to{box-shadow:0 0 30px rgba(255,215,0,.9)}}
+.pu-info{font-family:'Bangers',cursive;font-size:13px;color:rgba(255,255,255,.5);letter-spacing:2px;padding:0 10px;flex:1;text-align:center}
+
+/* ─── QUESTION ZONE ─── */
+.q-zone{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 12px 6px;min-height:0}
+.q-streak-banner{font-family:'Bangers',cursive;font-size:14px;letter-spacing:3px;color:var(--gold);
+  min-height:20px;text-align:center;text-shadow:0 0 10px var(--gold)}
+.q-equation{font-family:'Bangers',cursive;font-size:clamp(34px,10vw,58px);color:#fff;
+  text-align:center;line-height:1;text-shadow:0 0 30px rgba(255,255,255,.2);margin:4px 0}
+.q-sub{font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.4);text-align:center;margin-bottom:6px}
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:380px;margin:0 auto}
+.opt-btn{padding:14px 8px;font-family:'Bangers',cursive;font-size:clamp(20px,7vw,32px);letter-spacing:2px;
+  background:rgba(255,255,255,.04);border:2.5px solid rgba(255,255,255,.14);color:#fff;
+  border-radius:14px;cursor:pointer;transition:all .15s cubic-bezier(.34,1.56,.64,1);
+  position:relative;overflow:hidden;min-height:60px;display:flex;align-items:center;justify-content:center}
+.opt-btn:not([disabled]):hover{border-color:rgba(0,212,255,.6);transform:translateY(-3px) scale(1.03);box-shadow:0 0 20px rgba(0,212,255,.3)}
+.opt-btn:not([disabled]):active{transform:scale(.95)}
+.opt-btn.correct{background:rgba(0,255,136,.15);border-color:var(--green);color:var(--green);
+  box-shadow:0 0 28px rgba(0,255,136,.5);transform:scale(1.05)}
+.opt-btn.wrong{background:rgba(255,34,68,.15);border-color:var(--ec);color:var(--ec);
+  box-shadow:0 0 28px rgba(255,34,68,.4);animation:ngS .35s ease}
+@keyframes ngS{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.3);transform:scale(0);animation:rip .5s linear;pointer-events:none}
+@keyframes rip{to{transform:scale(4);opacity:0}}
+
+/* ─── FLOATING TEXTS ─── */
+.dmg-pop{position:fixed;pointer-events:none;z-index:600;font-family:'Bangers',cursive;font-size:32px;
+  letter-spacing:2px;animation:dmgFloat 1s ease-out forwards;text-shadow:0 2px 6px rgba(0,0,0,.7)}
+@keyframes dmgFloat{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-70px) scale(.7)}}
+.combo-pop{position:fixed;pointer-events:none;z-index:600;font-family:'Bangers',cursive;font-size:clamp(28px,8vw,48px);
+  text-align:center;left:50%;transform:translateX(-50%);top:32%;
+  animation:comboPop .8s cubic-bezier(.34,1.56,.64,1) forwards;color:var(--gold);
+  text-shadow:0 0 20px var(--gold),0 4px 0 #663300;letter-spacing:4px}
+@keyframes comboPop{0%{opacity:0;transform:translateX(-50%) scale(.3)}50%{opacity:1;transform:translateX(-50%) scale(1.2)}80%{opacity:1;transform:translateX(-50%) scale(1)}100%{opacity:0;transform:translateX(-50%) scale(.8) translateY(-20px)}}
+
+/* ─── RESULT OVERLAY ─── */
+.result-overlay{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+  z-index:300;padding:20px}
+.result-overlay.on{display:flex}
+.result-box{background:rgba(7,0,15,.95);border:3px solid;border-radius:24px;padding:28px 24px;
+  text-align:center;max-width:380px;width:100%;animation:resIn .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes resIn{from{transform:scale(.5) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
+.res-emoji{font-size:64px;display:block;margin-bottom:10px;animation:eeB .5s cubic-bezier(.34,1.56,.64,1) .2s both}
+@keyframes eeB{from{transform:scale(.2)}to{transform:scale(1)}}
+.res-title{font-family:'Bangers',cursive;font-size:clamp(36px,10vw,60px);letter-spacing:4px;margin-bottom:4px;line-height:1}
+.res-sub{font-size:12px;letter-spacing:3px;opacity:.6;margin-bottom:18px}
+.res-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:14px 0}
+.rs{background:rgba(255,255,255,.05);border-radius:12px;padding:10px 6px}
+.rs-l{font-size:9px;color:rgba(255,255,255,.4);letter-spacing:2px;margin-bottom:4px}
+.rs-v{font-family:'Bangers',cursive;font-size:24px;color:var(--gold)}
+.res-btns{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+
+/* ─── FINAL VICTORY ─── */
+#s-victory{background:radial-gradient(circle at 50% 40%,#0a0030,#07000f)}
+.trophyR{font-size:80px;display:block;animation:trophyBounce 1s cubic-bezier(.34,1.56,.64,1) infinite alternate}
+@keyframes trophyBounce{from{transform:translateY(0) rotate(-5deg)}to{transform:translateY(-16px) rotate(5deg)}}
+.vic-title{font-family:'Bangers',cursive;font-size:clamp(36px,11vw,70px);letter-spacing:4px;
+  background:linear-gradient(180deg,#fff 0%,var(--gold) 60%,#ff6600 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 20px rgba(255,215,0,.6));text-align:center;line-height:1}
+.vic-sub{font-size:13px;letter-spacing:4px;color:var(--gold);opacity:.7;text-align:center;margin:6px 0 20px}
+.xp-bar-wrap{width:100%;max-width:300px;margin:10px 0}
+.xp-bar-t{height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin-top:5px}
+.xp-bar-f{height:100%;background:linear-gradient(90deg,var(--purple),var(--p1));border-radius:4px;transition:width .8s cubic-bezier(.34,1.56,.64,1)}
+
+/* ─── TOAST ─── */
+.tst{position:fixed;bottom:75px;left:50%;transform:translateX(-50%);
+  background:rgba(7,0,15,.94);border:2px solid rgba(255,255,255,.15);
+  padding:10px 22px;border-radius:30px;font-size:12px;letter-spacing:2px;
+  z-index:700;animation:tstin 2.8s ease forwards;white-space:nowrap;font-family:'Nunito',sans-serif;font-weight:700}
+@keyframes tstin{0%{opacity:0;transform:translateX(-50%) translateY(12px)}12%{opacity:1;transform:translateX(-50%)}78%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-8px)}}
+
+/* FREEZE FX */
+.freeze-overlay{position:fixed;inset:0;z-index:100;pointer-events:none;display:none;
+  border:4px solid rgba(0,212,255,.6);background:rgba(0,212,255,.03);animation:fzPulse .8s ease-in-out infinite}
+@keyframes fzPulse{0%,100%{border-color:rgba(0,212,255,.4)}50%{border-color:rgba(0,212,255,.9)}}
+
+/* BACK */
+.bk{position:absolute;top:14px;left:14px;font-family:'Bangers',cursive;font-size:14px;letter-spacing:2px;
+  color:rgba(255,255,255,.4);background:none;border:none;cursor:pointer;padding:8px;transition:color .2s;z-index:5}
+.bk:hover{color:#fff}
+
+/* RESPONSIVE */
+@media(max-width:380px){.opts-grid{gap:7px;padding:0 6px}.opt-btn{min-height:52px;font-size:18px}.pub{width:44px;height:44px;font-size:18px}.fighter{width:90px;height:160px}}
+@media(min-height:750px){.opt-btn{min-height:68px}.q-equation{font-size:clamp(38px,11vw,65px)}}
 </style>
 </head>
 <body>
 
-<!-- BG -->
-<div class="stars" id="stars"></div>
-<div class="nebula"></div>
+<!-- ── CANVAS + OVERLAYS ── -->
+<canvas id="fx"></canvas>
+<div class="freeze-overlay" id="fzOv"></div>
 
-<!-- OVERLAYS -->
-<div class="flash" id="flash"></div>
-<div class="freeze-frame" id="freezeFrame"></div>
-<div class="timebar" id="timebar"><div class="timebar-fill" id="timebarFill"></div></div>
-
-<!-- ══════════════ MENU ══════════════ -->
-<div class="screen active" id="menuScreen">
-  <div class="logo">⚡ MATH<br>TUG OF WAR</div>
-  <div class="logo-sub">MASTER YOUR MIND · DESTROY YOUR OPPONENT</div>
-  <div class="divider"></div>
-  <button class="btn btn-c" onclick="showScreen('modeScreen')">🎮 PLAY NOW</button>
-  <button class="btn btn-g" onclick="handleDaily()">📅 DAILY CHALLENGE</button>
-  <button class="btn btn-s" onclick="showLB()">🏆 LEADERBOARD</button>
-  <div style="margin-top:24px;text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;line-height:2.2">
-    ⚡ 4 GAME MODES &nbsp;·&nbsp; 🔋 POWER-UPS &nbsp;·&nbsp; 🔥 STREAK BONUSES<br>
-    📅 DAILY CHALLENGE &nbsp;·&nbsp; 🏆 LEADERBOARD &nbsp;·&nbsp; 📱 MOBILE READY
+<!-- ════════════════════ MENU ════════════════════ -->
+<div class="scr on" id="s-menu">
+  <div class="fire-l"></div><div class="fire-r"></div>
+  <div class="crowd-bg"></div>
+  <div class="menu-fighters" style="position:relative">
+    <div class="menu-fighter-wrap">
+      <div class="fighter p-arjun" style="transform:scale(.75);transform-origin:bottom center" id="menuFighter1">
+        <div class="f-shadow"></div>
+        <div class="f-body">
+          <div class="f-leg-back"><div class="f-thigh"></div><div class="f-shin"></div><div class="f-foot"></div></div>
+          <div class="f-torso"><div class="f-collar"></div></div>
+          <div class="f-belt"><div class="f-belt-buckle"></div></div>
+          <div class="f-arm-back"><div class="f-forearm-b"><div class="f-fist-b"></div></div></div>
+          <div class="f-arm-front"><div class="f-forearm-f"><div class="f-fist-f"></div></div></div>
+          <div class="f-leg-front"><div class="f-thigh"></div><div class="f-shin"></div><div class="f-foot"></div></div>
+          <div class="f-neck"></div>
+          <div class="f-head"><div class="f-face"><div class="f-hair-top"></div><div class="f-hair-side-l"></div><div class="f-hair-side-r"></div><div class="f-ear-l"></div><div class="f-ear-r"></div><div class="f-eyebrow-l"></div><div class="f-eyebrow-r"></div><div class="f-eye-l"><div class="f-pupil"></div></div><div class="f-eye-r"><div class="f-pupil"></div></div><div class="f-nose"></div><div class="f-mouth"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="menu-vs">VS</div>
+    <div class="menu-fighter-wrap">
+      <div class="fighter e-raju enemy" style="transform:scale(.75) scaleX(-1);transform-origin:bottom center">
+        <div class="f-shadow"></div>
+        <div class="f-body">
+          <div class="f-leg-back"><div class="f-thigh"></div><div class="f-shin"></div><div class="f-foot"></div></div>
+          <div class="f-torso"><div class="f-collar"></div></div>
+          <div class="f-belt"><div class="f-belt-buckle"></div></div>
+          <div class="f-arm-back"><div class="f-forearm-b"><div class="f-fist-b"></div></div></div>
+          <div class="f-arm-front"><div class="f-forearm-f"><div class="f-fist-f"></div></div></div>
+          <div class="f-leg-front"><div class="f-thigh"></div><div class="f-shin"></div><div class="f-foot"></div></div>
+          <div class="f-neck"></div>
+          <div class="f-head"><div class="f-face"><div class="f-hair-top"></div><div class="f-hair-side-l"></div><div class="f-hair-side-r"></div><div class="f-ear-l"></div><div class="f-ear-r"></div><div class="f-eyebrow-l"></div><div class="f-eyebrow-r"></div><div class="f-eye-l"><div class="f-pupil"></div></div><div class="f-eye-r"><div class="f-pupil"></div></div><div class="f-nose"></div><div class="f-mouth"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="game-logo">⚔️ MATH<br>FIGHTER</div>
+  <div class="game-tagline">SOLVE FAST · ATTACK HARD · WIN GLORY</div>
+  <div class="menu-btns">
+    <button class="mbtn c" onclick="SS('s-char')">⚡ START GAME</button>
+    <button class="mbtn g" onclick="showStory()">📖 STORY</button>
+    <button class="mbtn p" onclick="showLB()">🏆 TOP FIGHTERS</button>
+  </div>
+  <div style="position:absolute;bottom:14px;font-size:10px;color:rgba(255,255,255,.25);letter-spacing:2px;text-align:center;width:100%">
+    7 OPPONENTS · PROGRESSIVE DIFFICULTY · FREE ON GITHUB PAGES
   </div>
 </div>
 
-<!-- ══════════════ MODE SELECT ══════════════ -->
-<div class="screen" id="modeScreen">
-  <button class="back-btn" onclick="showScreen('menuScreen')">← BACK</button>
-  <div class="sec-title">SELECT GAME MODE</div>
-  <div class="mode-grid">
-    <div class="mode-card sel" id="mc-solo" onclick="pickMode('solo',this)">
-      <span class="mc-icon">🤖</span>
-      <div class="mc-name">SOLO VS AI</div>
-      <div class="mc-desc">Beat the machine!</div>
+<!-- ════════════════════ CHAR SELECT ════════════════════ -->
+<div class="scr" id="s-char">
+  <button class="bk" onclick="SS('s-menu')">← BACK</button>
+  <div style="text-align:center;margin-bottom:6px;margin-top:40px">
+    <div class="cs-title">CHOOSE YOUR FIGHTER</div>
+    <div class="cs-sub">YOUR DESTINY AWAITS</div>
+  </div>
+  <div class="char-cards" id="charCards">
+    <div class="cc sel" id="cc-0" onclick="selChar(0,this)">
+      <div class="fighter p-arjun" style="transform:scale(.8);transform-origin:bottom center;height:130px">
+        <div class="f-shadow"></div><div class="f-body">
+          <div class="f-leg-back"><div class="f-thigh"></div><div class="f-shin"></div><div class="f-foot"></div></div>
+          <div class="f-torso"><div class="f-collar"></div></div><div class="f-belt"><div class="f-belt-buckle"></div></div>
+          <div class="f-arm-back"><div class="f-forearm-b"><div class="f-fist-b"></div></div></div>
+          <div class="f-arm-front"><div class="f-forearm-f"><div class="f-fist-f"></div></div></div>
+          <div class="f-leg-front"><div class="f-thigh"></div><div class="f-shin"></div><div class="f-foot"></div></div>
+          <div class="f-neck"></div><div class="f-head"><div class="f-face"><div class="f-hair-top"></div><div class="f-hair-side-l"></div><div class="f-hair-side-r"></div><div class="f-ear-l"></div><div class="f-ear-r"></div><div class="f-eyebrow-l"></div><div class="f-eyebrow-r"></div><div class="f-eye-l"><div class="f-pupil"></div></div><div class="f-eye-r"><div class="f-pupil"></div></div><div class="f-nose"></div><div class="f-mouth smile"></div></div></div>
+        </div>
+      </div>
+      <div class="cc-nm">ARJUN</div><div class="cc-type">THE WARRIOR</div>
+      <div class="cc-stat"><span class="cc-s">⚡ ATK:★★★</span><span class="cc-s">🛡 DEF:★★</span></div>
     </div>
-    <div class="mode-card" id="mc-pvp" onclick="pickMode('pvp',this)">
-      <span class="mc-icon">⚔️</span>
-      <div class="mc-name">1V1 LOCAL</div>
-      <div class="mc-desc">Challenge a friend</div>
+    <div class="cc" id="cc-1" onclick="selChar(1,this)">
+      <div class="fighter p-priya" style="transform:scale(.8);transform-origin:bottom center;height:130px">
+        <div class="f-shadow"></div><div class="f-body">
+          <div class="f-leg-back"><div class="f-thigh"></div><div class="f-shin"></div><div class="f-foot"></div></div>
+          <div class="f-torso"><div class="f-collar"></div></div><div class="f-belt"><div class="f-belt-buckle"></div></div>
+          <div class="f-arm-back"><div class="f-forearm-b"><div class="f-fist-b"></div></div></div>
+          <div class="f-arm-front"><div class="f-forearm-f"><div class="f-fist-f"></div></div></div>
+          <div class="f-leg-front"><div class="f-thigh"></div><div class="f-shin"></div><div class="f-foot"></div></div>
+          <div class="f-neck"></div><div class="f-head"><div class="f-face"><div class="f-hair-top"></div><div class="f-hair-side-l"></div><div class="f-hair-side-r"></div><div class="f-ear-l"></div><div class="f-ear-r"></div><div class="f-eyebrow-l"></div><div class="f-eyebrow-r"></div><div class="f-eye-l"><div class="f-pupil"></div></div><div class="f-eye-r"><div class="f-pupil"></div></div><div class="f-nose"></div><div class="f-mouth smile"></div></div></div>
+        </div>
+      </div>
+      <div class="cc-nm">PRIYA</div><div class="cc-type">THE NINJA</div>
+      <div class="cc-stat"><span class="cc-s">⚡ ATK:★★</span><span class="cc-s">⚡ SPD:★★★</span></div>
     </div>
-    <div class="mode-card" id="mc-time" onclick="pickMode('time',this)">
-      <span class="mc-icon">⏱️</span>
-      <div class="mc-name">TIME ATTACK</div>
-      <div class="mc-desc">Race the clock!</div>
-    </div>
-    <div class="mode-card" id="mc-surv" onclick="pickMode('surv',this)">
-      <span class="mc-icon">💀</span>
-      <div class="mc-name">SURVIVAL</div>
-      <div class="mc-desc">How long can you last?</div>
+    <div class="cc" id="cc-2" onclick="selChar(2,this)">
+      <div class="fighter p-vikram" style="transform:scale(.8);transform-origin:bottom center;height:130px">
+        <div class="f-shadow"></div><div class="f-body">
+          <div class="f-leg-back"><div class="f-thigh"></div><div class="f-shin"></div><div class="f-foot"></div></div>
+          <div class="f-torso"><div class="f-collar"></div></div><div class="f-belt"><div class="f-belt-buckle"></div></div>
+          <div class="f-arm-back"><div class="f-forearm-b"><div class="f-fist-b"></div></div></div>
+          <div class="f-arm-front"><div class="f-forearm-f"><div class="f-fist-f"></div></div></div>
+          <div class="f-leg-front"><div class="f-thigh"></div><div class="f-shin"></div><div class="f-foot"></div></div>
+          <div class="f-neck"></div><div class="f-head"><div class="f-face"><div class="f-hair-top"></div><div class="f-hair-side-l"></div><div class="f-hair-side-r"></div><div class="f-ear-l"></div><div class="f-ear-r"></div><div class="f-eyebrow-l"></div><div class="f-eyebrow-r"></div><div class="f-eye-l"><div class="f-pupil"></div></div><div class="f-eye-r"><div class="f-pupil"></div></div><div class="f-nose"></div><div class="f-mouth smile"></div></div></div>
+        </div>
+      </div>
+      <div class="cc-nm">VIKRAM</div><div class="cc-type">THE POWER</div>
+      <div class="cc-stat"><span class="cc-s">💥 ATK:★★★★</span><span class="cc-s">🛡 DEF:★</span></div>
     </div>
   </div>
-
-  <div class="sec-title">DIFFICULTY</div>
-  <div class="pill-row">
-    <button class="pill sel" id="d-easy" onclick="pickDiff('easy',this)">EASY<br><small style="font-size:9px;opacity:.7">1 – 10</small></button>
-    <button class="pill" id="d-med" onclick="pickDiff('med',this)">MEDIUM<br><small style="font-size:9px;opacity:.7">1 – 100</small></button>
-    <button class="pill" id="d-hard" onclick="pickDiff('hard',this)">HARD<br><small style="font-size:9px;opacity:.7">1 – 1000</small></button>
-    <button class="pill" id="d-cust" onclick="pickDiff('cust',this)">CUSTOM</button>
+  <div style="text-align:center;font-size:11px;color:rgba(255,255,255,.4);letter-spacing:2px;margin-bottom:16px">
+    ALL CHARACTERS HAVE EQUAL MATH DIFFICULTY
   </div>
-  <div id="custInputs" style="display:none">
-    <div class="range-wrap">
-      <span style="font-size:11px;color:var(--muted)">MIN</span>
-      <input type="number" class="range-in" id="custMin" value="1" min="1" max="9999">
-      <span style="font-size:11px;color:var(--muted)">MAX</span>
-      <input type="number" class="range-in" id="custMax" value="500" min="2" max="99999">
-    </div>
-  </div>
-
-  <div class="sec-title">OPERATIONS</div>
-  <div class="pill-row">
-    <button class="op-pill pill sel" data-op="+" onclick="toggleOp(this)">+</button>
-    <button class="op-pill pill sel" data-op="-" onclick="toggleOp(this)">−</button>
-    <button class="op-pill pill sel" data-op="×" onclick="toggleOp(this)">×</button>
-    <button class="op-pill pill sel" data-op="÷" onclick="toggleOp(this)">÷</button>
-  </div>
-
-  <button class="btn btn-c" style="margin-top:14px" onclick="startGame()">⚡ START GAME</button>
+  <button class="mbtn c" style="max-width:280px;font-size:24px" onclick="goToFight()">⚔️ FIGHT!</button>
 </div>
 
-<!-- ══════════════ GAME ══════════════ -->
-<div class="screen" id="gameScreen">
-  <!-- HUD -->
-  <div class="hud">
-    <div class="hud-side">
-      <div class="hud-label" id="lbl1">YOU</div>
-      <div class="hud-score" style="color:var(--player)" id="sc1">0</div>
+<!-- ════════════════════ VS SCREEN ════════════════════ -->
+<div class="scr" id="s-vs">
+  <div class="vs-bg"></div>
+  <div class="vs-flare" id="vsFlare"></div>
+  <div class="vs-fighters" style="max-width:440px">
+    <div style="text-align:center">
+      <div class="fighter" id="vsP" style="margin:0 auto"></div>
+      <div class="vs-name" style="color:var(--p1)" id="vsPN">ARJUN</div>
+      <div class="vs-title" style="color:var(--p1)">YOUR FIGHTER</div>
     </div>
-    <div class="hud-center">
-      <div class="hud-timer" id="hudTimer">–</div>
-      <div class="hud-mode" id="hudMode">SOLO VS AI</div>
+    <div class="vs-big">VS</div>
+    <div style="text-align:center">
+      <div class="fighter enemy" id="vsE" style="margin:0 auto"></div>
+      <div class="vs-name" style="color:var(--ec)" id="vsEN">RAJU</div>
+      <div class="vs-title" style="color:var(--ec)" id="vsET">VILLAGE BULLY</div>
     </div>
-    <div class="hud-side right">
-      <div class="hud-label" id="lbl2">AI</div>
-      <div class="hud-score" style="color:var(--enemy)" id="sc2">0</div>
+  </div>
+  <div id="vsCountdown" style="font-family:'Bangers',cursive;font-size:80px;color:#fff;text-shadow:0 0 30px #fff;animation:vsSlam .3s cubic-bezier(.34,1.56,.64,1);position:relative;z-index:2">3</div>
+</div>
+
+<!-- ════════════════════ FIGHT ════════════════════ -->
+<div class="scr" id="s-fight">
+<div class="fight-wrap">
+  <!-- HP HUD -->
+  <div class="hp-hud">
+    <div class="hp-row">
+      <div class="hp-name p" id="pName">ARJUN</div>
+      <div class="hp-bar-wrap" id="pHpWrap">
+        <div class="hp-bar p" id="pHpBar" style="width:100%"></div>
+        <div class="hp-num" id="pHpNum">200</div>
+      </div>
+    </div>
+    <div class="round-info">
+      <div class="combo-display" id="comboDisp"></div>
+      <div class="round-num" id="roundNum">ROUND 1/7</div>
+      <div class="timer-ring">
+        <svg viewBox="0 0 36 36">
+          <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="3"/>
+          <circle id="timerArc" cx="18" cy="18" r="15" fill="none" stroke="var(--gold)" stroke-width="3"
+            stroke-dasharray="94.25" stroke-dashoffset="0" stroke-linecap="round" style="transform:rotate(-90deg);transform-origin:50% 50%"/>
+        </svg>
+        <div class="timer-val" id="timerVal">10</div>
+      </div>
+      <div class="combo-display" id="streakDisp" style="text-align:left"></div>
+    </div>
+    <div class="hp-row" style="margin-top:4px">
+      <div class="hp-bar-wrap" id="eHpWrap">
+        <div class="hp-bar e" id="eHpBar" style="width:100%"></div>
+        <div class="hp-num" id="eHpNum">100</div>
+      </div>
+      <div class="hp-name e" id="eName">RAJU</div>
     </div>
   </div>
 
-  <div class="game-body">
-    <!-- ROPE -->
-    <div class="rope-arena">
-      <div class="fighters">
-        <div class="fighter" id="fig1">💪</div>
-        <div class="fighter enemy" id="fig2">🤖</div>
-      </div>
-      <div class="rope-track">
-        <div class="rope-fl" id="ropeL" style="width:0%"></div>
-        <div class="rope-fr" id="ropeR" style="width:0%"></div>
-        <div class="rope-mid"></div>
-        <div class="rope-knot" id="knot" style="left:50%">●</div>
-      </div>
-      <div class="rope-labels">
-        <span class="rope-lbl" style="color:var(--player)">← YOUR SIDE</span>
-        <span class="rope-lbl" style="color:var(--enemy)">ENEMY SIDE →</span>
-      </div>
+  <!-- ARENA -->
+  <div class="arena">
+    <div class="arena-bg" id="arenaBg"></div>
+    <div class="arena-crowd"></div>
+    <div class="arena-lights">
+      <div class="arena-light"></div><div class="arena-light"></div><div class="arena-light"></div>
     </div>
-
-    <!-- POWER BAR -->
-    <div class="power-bar">
-      <div class="streak-wrap">
-        <span style="font-size:20px">🔥</span>
-        <span class="streak-num" id="streakNum">0</span>
-        <span class="streak-badge" id="streakBadge" style="display:none">×1.5</span>
-      </div>
-      <div class="pups">
-        <button class="pup" id="pup-bolt" onclick="usePowerup('bolt')" title="Speed Boost - 2x pull">⚡<span class="pup-cnt" id="cnt-bolt">2</span></button>
-        <button class="pup" id="pup-shield" onclick="usePowerup('shield')" title="Shield - block 1 mistake">🛡️<span class="pup-cnt" id="cnt-shield">1</span></button>
-        <button class="pup" id="pup-freeze" onclick="usePowerup('freeze')" title="Freeze AI for 5s">❄️<span class="pup-cnt" id="cnt-freeze">1</span></button>
-      </div>
+    <div class="arena-floor"></div>
+    <div class="arena-fighters">
+      <div id="pFighter"></div>
+      <div id="eFighter"></div>
     </div>
+  </div>
 
-    <!-- QUESTION -->
-    <div class="q-area">
-      <div class="lives-row" id="livesRow"></div>
-      <div class="q-display" id="qDisp">?</div>
-      <div class="q-hint" id="qHint">= ?</div>
-    </div>
+  <!-- POWERUPS -->
+  <div class="pu-row">
+    <div class="pub" id="pu-punch" onclick="usePU('punch')" title="Power Punch — 3x damage">💥<span class="pub-cnt" id="pc-punch">2</span></div>
+    <div class="pu-info" id="puInfo">POWER-UPS</div>
+    <div class="pub" id="pu-shield" onclick="usePU('shield')" title="Block next hit">🛡️<span class="pub-cnt" id="pc-shield">1</span></div>
+    <div class="pub" id="pu-freeze" onclick="usePU('freeze')" title="Freeze enemy 5s">❄️<span class="pub-cnt" id="pc-freeze">1</span></div>
+  </div>
 
-    <!-- MCQ OPTIONS -->
+  <!-- QUESTION -->
+  <div class="q-zone">
+    <div class="q-streak-banner" id="streakBanner"></div>
+    <div class="q-equation" id="qEq">?</div>
+    <div class="q-sub" id="qSub">SOLVE TO ATTACK!</div>
     <div class="opts-grid" id="optsGrid">
-      <button class="opt" id="o0" onclick="answer(0)"></button>
-      <button class="opt" id="o1" onclick="answer(1)"></button>
-      <button class="opt" id="o2" onclick="answer(2)"></button>
-      <button class="opt" id="o3" onclick="answer(3)"></button>
+      <button class="opt-btn" id="ob0" onclick="answerQ(0)"></button>
+      <button class="opt-btn" id="ob1" onclick="answerQ(1)"></button>
+      <button class="opt-btn" id="ob2" onclick="answerQ(2)"></button>
+      <button class="opt-btn" id="ob3" onclick="answerQ(3)"></button>
     </div>
+  </div>
 
-    <!-- PVP INPUTS -->
-    <div class="pvp-wrap" id="pvpWrap" style="display:none">
-      <div class="pvp-group">
-        <div class="pvp-lbl" style="color:var(--player)">⬅ PLAYER 1</div>
-        <input type="number" class="pvp-in" id="pin1" style="border-color:var(--player)" placeholder="?" onkeydown="pvpKey(event,1)">
-        <div style="font-size:9px;color:var(--muted);text-align:center;letter-spacing:1px">PRESS ENTER</div>
-      </div>
-      <div class="pvp-group">
-        <div class="pvp-lbl" style="color:var(--enemy)">PLAYER 2 ➡</div>
-        <input type="number" class="pvp-in" id="pin2" style="border-color:var(--enemy)" placeholder="?" onkeydown="pvpKey(event,2)">
-        <div style="font-size:9px;color:var(--muted);text-align:center;letter-spacing:1px">PRESS ENTER</div>
-      </div>
-    </div>
+  <!-- QUIT -->
+  <button onclick="quitFight()" style="font-family:'Bangers',cursive;font-size:13px;color:rgba(255,255,255,.25);background:none;border:none;cursor:pointer;letter-spacing:2px;padding:8px 20px;flex-shrink:0;width:100%;text-align:center">✕ RETREAT</button>
+</div>
+</div>
 
-    <!-- AI THINKING -->
-    <div class="ai-thinking" id="aiThink" style="display:none">
-      <div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>
-    </div>
+<!-- ════════════════════ ROUND RESULT ════════════════════ -->
+<div class="result-overlay" id="roundResult">
+  <div class="result-box" id="rrBox">
+    <span class="res-emoji" id="rrEmoji">🏆</span>
+    <div class="res-title" id="rrTitle">KNOCKOUT!</div>
+    <div class="res-sub" id="rrSub">ROUND 1 COMPLETE</div>
+    <div class="res-stats" id="rrStats"></div>
+    <div class="res-btns" id="rrBtns"></div>
+  </div>
+</div>
 
-    <!-- QUIT -->
-    <div style="text-align:center;padding:8px 0 16px">
-      <button onclick="quitGame()" style="font-family:'Orbitron',monospace;font-size:9px;color:var(--muted);background:none;border:none;cursor:pointer;letter-spacing:2px;padding:6px">✕ QUIT GAME</button>
+<!-- ════════════════════ GAME OVER ════════════════════ -->
+<div class="result-overlay" id="gameOver">
+  <div class="result-box" style="border-color:var(--ec)">
+    <span class="res-emoji">💀</span>
+    <div class="res-title" style="color:var(--ec)">GAME OVER</div>
+    <div class="res-sub">YOU WERE DEFEATED</div>
+    <div class="res-stats" id="goStats"></div>
+    <div class="res-btns">
+      <button class="mbtn c" onclick="retryFight()">🔄 TRY AGAIN</button>
+      <button class="mbtn g" onclick="SS('s-char')">← CHAR SELECT</button>
+      <button class="mbtn p" onclick="SS('s-menu')">🏠 MENU</button>
     </div>
   </div>
 </div>
 
-<!-- ══════════════ RESULT ══════════════ -->
-<div class="screen" id="resultScreen">
-  <div class="result-box slide-up">
-    <span class="res-emoji" id="resEmoji">🏆</span>
-    <div class="res-title" id="resTitle">VICTORY!</div>
-    <div class="stats-grid" id="statsGrid"></div>
-    <div class="name-wrap" id="nameWrap" style="display:none">
-      <div class="name-lbl">ENTER NAME FOR LEADERBOARD</div>
-      <input type="text" class="name-in" id="nameIn" maxlength="12" placeholder="YOUR NAME">
+<!-- ════════════════════ FINAL VICTORY ════════════════════ -->
+<div class="scr" id="s-victory" style="background:radial-gradient(circle at 50% 40%,#0a0030,#07000f)">
+  <span class="trophyR">🏆</span>
+  <div class="vic-title">MATH<br>CHAMPION!</div>
+  <div class="vic-sub">YOU DEFEATED ALL 7 OPPONENTS</div>
+  <div class="xp-bar-wrap">
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.5);letter-spacing:2px">
+      <span id="lvlTxt">LVL 1</span><span id="xpTxt">0 XP</span>
     </div>
-    <button class="btn btn-c" onclick="saveAndRetry()" style="margin-top:8px">▶ PLAY AGAIN</button>
-    <button class="btn btn-g" onclick="showScreen('menuScreen')">🏠 MAIN MENU</button>
-    <button class="btn btn-s" onclick="showLB()">🏆 LEADERBOARD</button>
+    <div class="xp-bar-t"><div class="xp-bar-f" id="xpBarF" style="width:0%"></div></div>
+  </div>
+  <div id="finalStats" style="margin:14px 0;text-align:center;font-size:12px;color:rgba(255,255,255,.5);letter-spacing:2px;line-height:2.4"></div>
+  <div class="menu-btns" style="max-width:280px">
+    <button class="mbtn g" onclick="SS('s-char')">⚔️ PLAY AGAIN</button>
+    <button class="mbtn c" onclick="showLB()">🏆 LEADERBOARD</button>
+    <button class="mbtn p" onclick="SS('s-menu')">🏠 MENU</button>
   </div>
 </div>
 
-<!-- ══════════════ LEADERBOARD ══════════════ -->
-<div class="screen" id="lbScreen">
-  <button class="back-btn" onclick="showScreen('menuScreen')">← BACK</button>
-  <div class="sec-title" style="margin-top:32px">🏆 LEADERBOARD</div>
-  <div class="divider"></div>
-  <div class="lb-filters" id="lbFilters">
-    <button class="pill sel" onclick="filterLB('all',this)">ALL</button>
-    <button class="pill" onclick="filterLB('solo',this)">SOLO</button>
-    <button class="pill" onclick="filterLB('time',this)">TIME ATTACK</button>
-    <button class="pill" onclick="filterLB('surv',this)">SURVIVAL</button>
-    <button class="pill" onclick="filterLB('daily',this)">DAILY</button>
+<!-- ════════════════════ LEADERBOARD ════════════════════ -->
+<div class="scr" id="s-lb">
+  <button class="bk" onclick="SS('s-menu')">← BACK</button>
+  <div style="margin-top:44px;margin-bottom:16px;text-align:center">
+    <div style="font-family:'Bangers',cursive;font-size:40px;color:var(--gold);letter-spacing:4px;text-shadow:0 0 20px var(--gold)">🏆 TOP FIGHTERS</div>
+    <div style="font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.4);margin-top:4px">HALL OF FAME</div>
   </div>
-  <div class="lb-list" id="lbList"></div>
-  <button class="btn btn-r" onclick="clearLB()" style="margin-top:16px;max-width:200px">🗑 CLEAR ALL</button>
+  <div id="lbList" style="width:100%;max-width:420px;padding:0 12px"></div>
+  <button class="mbtn p" onclick="clrLB()" style="max-width:200px;margin-top:18px;font-size:16px">🗑 CLEAR</button>
 </div>
 
-<!-- ══════════════ DAILY SCREEN ══════════════ -->
-<div class="screen" id="dailyScreen">
-  <button class="back-btn" onclick="showScreen('menuScreen')">← BACK</button>
-  <div class="daily-badge">📅 DAILY CHALLENGE</div>
-  <div class="sec-title" id="dailyTitle">COMPLETED!</div>
-  <div id="dailyContent"></div>
+<!-- ════════════════════ STORY ════════════════════ -->
+<div class="scr" id="s-story">
+  <button class="bk" onclick="SS('s-menu')">← BACK</button>
+  <div style="max-width:400px;padding:50px 20px;text-align:center">
+    <div style="font-size:48px;margin-bottom:16px">📜</div>
+    <div style="font-family:'Bangers',cursive;font-size:32px;color:var(--gold);letter-spacing:3px;margin-bottom:14px">THE STORY</div>
+    <div style="font-size:14px;line-height:2;color:rgba(255,255,255,.75);letter-spacing:1px">
+      In the land of <span style="color:var(--gold)">Ganit Nagar</span>, a mysterious villain stole the sacred <span style="color:var(--p1)">Calculator of Wisdom</span> — plunging the world into mathematical darkness.<br><br>
+      <span style="color:var(--green)">7 mighty fighters</span> guard the path to the Calculator. Only a true Math Master can defeat them all and restore balance to the world.<br><br>
+      <span style="color:var(--purple)">Your weapon? Fast math. Your armor? Sharp thinking.</span><br><br>
+      Solve equations to unleash devastating attacks. Streak wins to unlock SUPER MOVES!<br><br>
+      <span style="color:var(--gold)">Are you the Math Champion the world needs?</span>
+    </div>
+    <button class="mbtn c" style="margin-top:24px;max-width:240px" onclick="SS('s-char')">⚔️ BEGIN QUEST</button>
+  </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════
-//  STARS
-// ═══════════════════════════════════════
-(function(){
-  const c=document.getElementById('stars');
-  for(let i=0;i<90;i++){
-    const s=document.createElement('div');s.className='star';
-    const sz=Math.random()*2.5+.8;
-    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*4}s;--delay:${Math.random()*5}s;opacity:${.1+Math.random()*.5}`;
-    c.appendChild(s);
-  }
-})();
+// ═══════════════════════════════════════════════════════
+//  CANVAS FX
+// ═══════════════════════════════════════════════════════
+const cvs=document.getElementById('fx');
+const ctx=cvs.getContext('2d');
+let pts=[];
+function resC(){cvs.width=window.innerWidth;cvs.height=window.innerHeight}
+resC();window.addEventListener('resize',resC);
 
-// ═══════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════
-const G={
-  mode:'solo', diff:'easy', ops:['+','-','×','÷'],
-  custMin:1, custMax:500,
-  ropePos:50,          // 0=p1win  100=p2win
-  sc1:0, sc2:0,
-  streak:0, maxStreak:0, mult:1,
-  correct:0, wrong:0, total:0,
-  lives:3,
-  timeLeft:60,
-  active:false,
-  aiDelay:3000,
-  frozen:false,
-  shield:false,
-  pups:{bolt:2,shield:1,freeze:1},
-  boltBoost:0,         // remaining boost questions
-  qStart:0, timeSum:0,
-  pvpDone:[false,false],
-  isDaily:false,
-  dailySeed:0,
-  dailyIdx:0,
-  curOpts:[],
-  curAns:0,
-  _timerId:null, _aiId:null, _driftId:null
-};
-
-let selMode='solo', selDiff='easy', selOps=['+','-','×','÷'];
-
-// ═══════════════════════════════════════
-//  SCREEN
-// ═══════════════════════════════════════
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function showLB(){showScreen('lbScreen');renderLB('all')}
-
-// ═══════════════════════════════════════
-//  SETTINGS UI
-// ═══════════════════════════════════════
-function pickMode(m,el){
-  selMode=m;
-  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('sel'));
-  el.classList.add('sel');
-}
-function pickDiff(d,el){
-  selDiff=d;
-  document.querySelectorAll('#modeScreen .pill:not(.op-pill)').forEach(b=>b.classList.remove('sel'));
-  el.classList.add('sel');
-  document.getElementById('custInputs').style.display=d==='cust'?'block':'none';
-}
-function toggleOp(el){
-  const op=el.dataset.op;
-  el.classList.toggle('sel');
-  if(el.classList.contains('sel')){if(!selOps.includes(op))selOps.push(op)}
-  else{
-    selOps=selOps.filter(o=>o!==op);
-    if(!selOps.length){selOps.push(op);el.classList.add('sel');toast('Need at least 1 operation!')}
+function burst(x,y,col,n=28){
+  for(let i=0;i<n;i++){
+    const a=Math.PI*2/n*i+Math.random()*.5;
+    const sp=3+Math.random()*6;
+    pts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,life:1,dec:.025+Math.random()*.02,sz:2+Math.random()*5,col,type:'spark'});
   }
 }
+function confetti(){
+  const cs=['#ffd700','#00d4ff','#ff2244','#00ff88','#cc44ff','#ff9900'];
+  for(let i=0;i<80;i++){
+    pts.push({x:Math.random()*cvs.width,y:-20,vx:(Math.random()-.5)*4,vy:2+Math.random()*5,
+      life:1,dec:.006,sz:5+Math.random()*8,col:cs[i%cs.length],type:'confetti',
+      rot:Math.random()*Math.PI*2,rs:(Math.random()-.5)*.25,w:8+Math.random()*8,h:4+Math.random()*5});
+  }
+}
+function fxLoop(){
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  for(let i=pts.length-1;i>=0;i--){
+    const p=pts[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.14;p.life-=p.dec;
+    if(p.type==='confetti')p.rot+=p.rs;
+    if(p.life<=0){pts.splice(i,1);continue}
+    ctx.save();ctx.globalAlpha=p.life;
+    if(p.type==='confetti'){
+      ctx.translate(p.x,p.y);ctx.rotate(p.rot);
+      ctx.fillStyle=p.col;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    }else{
+      ctx.fillStyle=p.col;ctx.shadowColor=p.col;ctx.shadowBlur=8;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.sz*p.life,0,Math.PI*2);ctx.fill();
+    }
+    ctx.restore();
+  }
+  requestAnimationFrame(fxLoop);
+}
+fxLoop();
 
-// ═══════════════════════════════════════
-//  MATH
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+//  SCREEN MANAGER
+// ═══════════════════════════════════════════════════════
+function SS(id){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  const el=document.getElementById(id);
+  if(el)setTimeout(()=>el.classList.add('on'),15);
+}
+
+// ═══════════════════════════════════════════════════════
+//  OPPONENTS DATA
+// ═══════════════════════════════════════════════════════
+const OPPS=[
+  {id:'raju',name:'RAJU',title:'Village Bully',hp:80,aiDel:5000,aiMiss:.52,bg:'bg-village',
+   color:'#cc1122',math:{ops:['+'],min:1,max:10}},
+  {id:'priya2',name:'PRIYA',title:'School Topper',hp:110,aiDel:4000,aiMiss:.38,bg:'bg-school',
+   color:'#9933cc',math:{ops:['+','-'],min:1,max:50}},
+  {id:'rocky',name:'ROCKY',title:'Gym Fighter',hp:150,aiDel:3200,aiMiss:.28,bg:'bg-gym',
+   color:'#dd6600',math:{ops:['+','-','×'],min:1,max:100}},
+  {id:'verma',name:'PROF. VERMA',title:'Math Teacher',hp:180,aiDel:2600,aiMiss:.18,bg:'bg-classroom',
+   color:'#1a6e1a',math:{ops:['+','-','×','÷'],min:1,max:200}},
+  {id:'cyber',name:'CYBER KID',title:'Tech Prodigy',hp:220,aiDel:2000,aiMiss:.1,bg:'bg-cyber',
+   color:'#0088cc',math:{ops:['+','-','×','÷','²'],min:1,max:500}},
+  {id:'grandmaster',name:'GRANDMASTER',title:'National Champion',hp:260,aiDel:1500,aiMiss:.06,bg:'bg-stadium',
+   color:'#aa7700',math:{ops:['+','-','×','÷','²','³'],min:1,max:1000}},
+  {id:'mathgod',name:'MATH GOD',title:'⚡ FINAL BOSS',hp:320,aiDel:1200,aiMiss:.03,bg:'bg-final',
+   color:'#9900cc',math:{ops:['+','-','×','÷','²','³'],min:10,max:9999}},
+];
+
+// ═══════════════════════════════════════════════════════
+//  XP SYSTEM
+// ═══════════════════════════════════════════════════════
+let XP={cur:0,lvl:1,max:600};
+try{const x=localStorage.getItem('mf_xp');if(x)XP=JSON.parse(x)}catch(e){}
+function addXP(n){
+  XP.cur+=n;
+  while(XP.cur>=XP.max){XP.cur-=XP.max;XP.lvl++;XP.max=Math.floor(XP.max*1.4);toast('⭐ LEVEL UP! LVL '+XP.lvl)}
+  try{localStorage.setItem('mf_xp',JSON.stringify(XP))}catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════════════════════════
+let G={};
+const CHARS=['arjun','priya','vikram'];
+const CHAR_NAMES=['ARJUN','PRIYA','VIKRAM'];
+let selCharIdx=0;
+
+function initG(){
+  const opp=OPPS[G.round]||OPPS[0];
+  G={
+    ...G,
+    pHP:G.pMaxHP,
+    eHP:opp.hp, eMaxHP:opp.hp,
+    streak:0, maxStreak:0, correct:0, wrong:0, total:0,
+    tSum:0, qStart:0,
+    active:false, frozen:false, shield:false, boltBoost:false,
+    pups:{punch:2,shield:1,freeze:1},
+    aiTimer:null, qTimer:null, driftTimer:null,
+    curOpts:[], curAns:0,
+    score:G.score||0
+  };
+}
+
+function selChar(i,el){
+  selCharIdx=i;
+  document.querySelectorAll('.cc').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function goToFight(){
+  G={round:0, pMaxHP:200, score:0, totalCorrect:0, totalWrong:0, totalQ:0, sessionStart:Date.now()};
+  initG();
+  showVS();
+}
+
+// ═══════════════════════════════════════════════════════
+//  VS SCREEN
+// ═══════════════════════════════════════════════════════
+function makeCharHTML(charClass,isEnemy){
+  const ec=isEnemy?'enemy':'';
+  return `<div class="fighter ${charClass} ${ec}">
+    <div class="f-shadow"></div><div class="f-body">
+      <div class="f-leg-back"><div class="f-thigh"></div><div class="f-shin"></div><div class="f-foot"></div></div>
+      <div class="f-torso"><div class="f-collar"></div></div><div class="f-belt"><div class="f-belt-buckle"></div></div>
+      <div class="f-arm-back"><div class="f-forearm-b"><div class="f-fist-b"></div></div></div>
+      <div class="f-arm-front"><div class="f-forearm-f"><div class="f-fist-f"></div></div></div>
+      <div class="f-leg-front"><div class="f-thigh"></div><div class="f-shin"></div><div class="f-foot"></div></div>
+      <div class="f-neck"></div>
+      <div class="f-head"><div class="f-face">
+        <div class="f-hair-top"></div><div class="f-hair-side-l"></div><div class="f-hair-side-r"></div>
+        <div class="f-ear-l"></div><div class="f-ear-r"></div>
+        <div class="f-eyebrow-l"></div><div class="f-eyebrow-r"></div>
+        <div class="f-eye-l"><div class="f-pupil"></div></div>
+        <div class="f-eye-r"><div class="f-pupil"></div></div>
+        <div class="f-nose"></div><div class="f-mouth"></div>
+      </div></div>
+    </div>
+  </div>`;
+}
+
+function showVS(){
+  const opp=OPPS[G.round];
+  const pClass='p-'+CHARS[selCharIdx];
+  const eClass='e-'+opp.id;
+  document.getElementById('vsP').innerHTML=makeCharHTML(pClass,false);
+  document.getElementById('vsE').innerHTML=makeCharHTML(eClass,true);
+  document.getElementById('vsPN').textContent=CHAR_NAMES[selCharIdx];
+  document.getElementById('vsEN').textContent=opp.name;
+  document.getElementById('vsET').textContent=opp.title;
+  SS('s-vs');
+  let cd=3;
+  document.getElementById('vsCountdown').textContent=cd;
+  const cdi=setInterval(()=>{
+    cd--;
+    const el=document.getElementById('vsCountdown');
+    if(cd>0){el.textContent=cd;el.style.animation='none';setTimeout(()=>el.style.animation='vsSlam .3s cubic-bezier(.34,1.56,.64,1)',10)}
+    else{clearInterval(cdi);el.textContent='FIGHT!';el.style.color='var(--ec)';setTimeout(startFight,700)}
+  },900);
+}
+
+// ═══════════════════════════════════════════════════════
+//  START FIGHT
+// ═══════════════════════════════════════════════════════
+function startFight(){
+  const opp=OPPS[G.round];
+  const pClass='p-'+CHARS[selCharIdx];
+  const eClass='e-'+opp.id;
+  document.getElementById('pFighter').innerHTML=makeCharHTML(pClass,false);
+  document.getElementById('eFighter').innerHTML=makeCharHTML(eClass,true);
+  document.getElementById('arenaBg').className='arena-bg '+opp.bg;
+  document.getElementById('pName').textContent=CHAR_NAMES[selCharIdx];
+  document.getElementById('eName').textContent=opp.name;
+  document.getElementById('roundNum').textContent='ROUND '+(G.round+1)+'/7';
+  document.getElementById('comboDisp').textContent='';
+  document.getElementById('streakDisp').textContent='';
+  updateHP();updatePUUI();
+  G.active=true;
+  SS('s-fight');
+  setTimeout(nextQ,400);
+}
+
+// ═══════════════════════════════════════════════════════
+//  MATH ENGINE
+// ═══════════════════════════════════════════════════════
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a}
-function srnd(seed,a,b){const x=Math.sin(seed)*10000;return a+Math.floor((x-Math.floor(x))*(b-a+1))}
-
-function getMax(){
-  if(selDiff==='easy')return 10;
-  if(selDiff==='med')return 100;
-  if(selDiff==='hard')return 1000;
-  return parseInt(document.getElementById('custMax').value)||500;
-}
-function getMin(){
-  if(selDiff==='cust')return parseInt(document.getElementById('custMin').value)||1;
-  return 1;
-}
-
-function makeQ(seed){
-  const ops=selOps.length?selOps:['+'];
-  const mn=getMin(), mx=getMax();
-  const R=seed!=null?(s,a,b)=>srnd(seed+s,a,b):(s,a,b)=>rnd(a,b);
-  const op=seed!=null?ops[srnd(seed+.5,0,ops.length-1)]:ops[Math.floor(Math.random()*ops.length)];
+function makeQ(){
+  const opp=OPPS[G.round];
+  const {ops,min,max}=opp.math;
+  const op=ops[Math.floor(Math.random()*ops.length)];
   let a,b,ans,disp;
-
-  if(op==='+'){
-    a=R(1,mn,mx);b=R(2,mn,mx);ans=a+b;disp=`${a} + ${b}`;
-  }else if(op==='-'){
-    a=R(1,mn+1,mx);b=R(2,mn,a-mn>0?a-1:mn);
-    if(a===b){a+=rnd(1,5)}
-    ans=a-b;disp=`${a} − ${b}`;
-  }else if(op==='×'){
-    const cap=selDiff==='easy'?10:selDiff==='med'?20:50;
-    a=R(1,2,Math.min(cap,mx));b=R(2,2,Math.min(cap,mx));ans=a*b;disp=`${a} × ${b}`;
-  }else{
-    const cap=selDiff==='easy'?10:selDiff==='med'?12:15;
-    b=R(1,2,cap);const q=R(2,2,Math.max(2,Math.floor(mx/b)));a=q*b;ans=q;disp=`${a} ÷ ${b}`;
-  }
-
-  // 4 options
-  const set=new Set([ans]);
-  let t=0;
-  while(set.size<4&&t++<60){
-    const d=rnd(1,Math.max(1,Math.floor(ans*.45)+4));
-    const c=ans+(Math.random()<.5?1:-1)*d;
-    if(c>0&&c!==ans)set.add(c);
-  }
-  while(set.size<4)set.add(ans+set.size);
+  if(op==='²'){a=rnd(2,Math.min(30,max));ans=a*a;disp=a+'²'}
+  else if(op==='³'){a=rnd(2,Math.min(12,max));ans=a*a*a;disp=a+'³'}
+  else if(op==='+'){a=rnd(min,max);b=rnd(min,max);ans=a+b;disp=a+' + '+b}
+  else if(op==='-'){a=rnd(min+2,max+2);b=rnd(min,a-1);ans=a-b;disp=a+' − '+b}
+  else if(op==='×'){const cap=max<=10?10:max<=100?22:55;a=rnd(2,Math.min(cap,max));b=rnd(2,Math.min(cap,max));ans=a*b;disp=a+' × '+b}
+  else{const cap=max<=100?12:18;b=rnd(2,cap);const q=rnd(2,Math.max(2,Math.floor(max/b)));a=q*b;ans=q;disp=a+' ÷ '+b}
+  const set=new Set([ans]);let t=0;
+  while(set.size<4&&t++<80){const d=rnd(1,Math.max(2,Math.floor(Math.abs(ans)*.45)+4));const c=ans+(Math.random()<.5?1:-1)*d;if(c!==ans&&c>-9999)set.add(c)}
+  while(set.size<4)set.add(ans+set.size+rnd(5,20));
   const opts=shuffle([...set]);
-  return{disp,ans,opts};
+  return{disp,ans,opts,op};
 }
-
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
-// ═══════════════════════════════════════
-//  START GAME
-// ═══════════════════════════════════════
-function startGame(isDaily=false,dseed=null){
-  // copy settings into G
-  G.mode=isDaily?'solo':selMode;
-  G.diff=isDaily?'med':selDiff;
-  G.isDaily=isDaily; G.dailySeed=dseed; G.dailyIdx=0;
-  G.ropePos=50;G.sc1=0;G.sc2=0;
-  G.streak=0;G.maxStreak=0;G.mult=1;
-  G.correct=0;G.wrong=0;G.total=0;
-  G.lives=3;G.timeLeft=60;
-  G.active=true;G.frozen=false;G.shield=false;
-  G.pups={bolt:2,shield:1,freeze:1};G.boltBoost=0;
-  G.timeSum=0;G.pvpDone=[false,false];
-
-  G.aiDelay=G.diff==='easy'?4200:G.diff==='med'?2600:1100;
-  if(isDaily)G.aiDelay=2200;
-
-  // UI
-  const isPvp=G.mode==='pvp';
-  const isTime=G.mode==='time';
-  const isSurv=G.mode==='surv';
-
-  document.getElementById('optsGrid').style.display=isPvp?'none':'grid';
-  document.getElementById('pvpWrap').style.display=isPvp?'flex':'none';
-  document.getElementById('fig2').style.display=(isSurv||isTime)?'none':'block';
-
-  document.getElementById('lbl1').textContent=isPvp?'P1':'YOU';
-  document.getElementById('lbl2').textContent=isPvp?'P2':(G.mode==='solo'?'AI':'BEST');
-  const modes={solo:'VS AI',pvp:'1V1 LOCAL',time:'⏱ TIME ATTACK',surv:'💀 SURVIVAL'};
-  document.getElementById('hudMode').textContent=modes[G.mode]||G.mode;
-  document.getElementById('fig1').textContent=isPvp?'🙋':'💪';
-  document.getElementById('fig2').textContent=isPvp?'🙋':G.mode==='solo'?'🤖':'👑';
-  document.getElementById('fig2').className='fighter enemy';
-
-  updateHUD();updateRope();renderLives();updatePUUI();updateStreakUI();
-
-  // timers
-  clearAll();
-  if(isTime){
-    document.getElementById('timebar').style.display='block';
-    document.getElementById('hudTimer').textContent=G.timeLeft;
-    updateTimebar();
-    G._timerId=setInterval(()=>{
-      G.timeLeft--;
-      document.getElementById('hudTimer').textContent=G.timeLeft;
-      updateTimebar();
-      if(G.timeLeft<=10){
-        document.getElementById('hudTimer').style.color='var(--danger)';
-      }
-      if(G.timeLeft<=0)end('timeout');
-    },1000);
-  }else{
-    document.getElementById('timebar').style.display='none';
-    document.getElementById('hudTimer').textContent=isSurv?'∞':'VS';
-    document.getElementById('hudTimer').style.color='var(--gold)';
-  }
-
-  showScreen('gameScreen');
-  nextQ();
-}
-
-// ═══════════════════════════════════════
-//  QUESTIONS
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+//  QUESTION FLOW
+// ═══════════════════════════════════════════════════════
+const Q_TIME=12;let qTimerRem=Q_TIME;let qTimerIv=null;
 function nextQ(){
   if(!G.active)return;
-  clearTimeout(G._aiId);clearTimeout(G._driftId);
-
-  if(G.mode==='pvp'){
-    document.getElementById('pin1').value='';
-    document.getElementById('pin2').value='';
-    document.getElementById('pin1').disabled=false;
-    document.getElementById('pin2').disabled=false;
-    document.getElementById('pin1').style.borderColor='var(--player)';
-    document.getElementById('pin2').style.borderColor='var(--enemy)';
-    G.pvpDone=[false,false];
-    setTimeout(()=>document.getElementById('pin1').focus(),80);
-  }
-
-  const q=G.isDaily?makeQ(G.dailySeed+G.dailyIdx*7.31):makeQ();
-  if(G.isDaily)G.dailyIdx++;
-  G.curOpts=q.opts;G.curAns=q.ans;
-  G.qStart=Date.now();G.total++;
-
-  document.getElementById('qDisp').textContent=q.disp;
-  document.getElementById('qHint').textContent='= ?';
-  document.getElementById('aiThink').style.display='none';
-
-  if(G.mode!=='pvp'){
-    [0,1,2,3].forEach(i=>{
-      const b=document.getElementById('o'+i);
-      b.textContent=q.opts[i];b.className='opt';b.disabled=false;
-    });
-  }
-
-  // AI for solo
-  if(G.mode==='solo'&&!G.frozen)scheduleAI();
-
-  // Survival drift - slow rope pull if no answer
-  if(G.mode==='surv'){
-    G._driftId=setTimeout(()=>{
-      if(!G.active)return;
-      G.ropePos=Math.min(100,G.ropePos+6);
-      updateRope();
-      if(G.ropePos>=100)end('lose');
-    },5500);
-  }
+  clearTimeout(G.aiTimer);clearInterval(qTimerIv);
+  G.total++;G.qStart=Date.now();
+  const q=makeQ();G.curOpts=q.opts;G.curAns=q.ans;
+  document.getElementById('qEq').textContent=q.disp+' = ?';
+  document.getElementById('qSub').textContent='SOLVE TO ATTACK!';
+  [0,1,2,3].forEach(i=>{const b=document.getElementById('ob'+i);b.textContent=q.opts[i];b.className='opt-btn';b.disabled=false});
+  // Q Timer
+  qTimerRem=Q_TIME;
+  document.getElementById('timerArc').setAttribute('stroke-dashoffset','0');
+  document.getElementById('timerVal').textContent=Q_TIME;
+  document.getElementById('timerVal').style.color='var(--gold)';
+  qTimerIv=setInterval(()=>{
+    qTimerRem--;
+    document.getElementById('timerVal').textContent=qTimerRem;
+    const pct=qTimerRem/Q_TIME;
+    document.getElementById('timerArc').setAttribute('stroke-dashoffset',94.25*(1-pct));
+    document.getElementById('timerArc').setAttribute('stroke',pct>.5?'var(--gold)':pct>.25?'#ff9900':'var(--ec)');
+    document.getElementById('timerVal').style.color=pct>.5?'var(--gold)':pct>.25?'#ff9900':'var(--ec)';
+    if(qTimerRem<=0){clearInterval(qTimerIv);processAns(false,-1,true)}
+  },1000);
+  // AI attack
+  if(!G.frozen)schedAI();
 }
 
-function scheduleAI(){
-  const delay=G.aiDelay*(0.6+Math.random()*0.8);
-  G._aiId=setTimeout(()=>{
+function schedAI(){
+  const opp=OPPS[G.round];
+  const d=opp.aiDel*(.5+Math.random()*.8);
+  G.aiTimer=setTimeout(()=>{
     if(!G.active||G.frozen)return;
-    document.getElementById('aiThink').style.display='flex';
-    G._aiId=setTimeout(()=>{
-      if(!G.active)return;
-      document.getElementById('aiThink').style.display='none';
-      const miss=G.diff==='easy'?.35:G.diff==='med'?.18:.05;
-      if(Math.random()<miss){
-        ropeShift(3);toast('🤖 AI made a mistake!');
-      }else{
-        G.sc2+=10;document.getElementById('sc2').textContent=G.sc2;
-        ropeShift(-8,true);
-        animFig('fig2');
-        if(G.ropePos>=100)end('lose');
-        else nextQ();
+    clearInterval(qTimerIv);
+    [0,1,2,3].forEach(i=>document.getElementById('ob'+i).disabled=true);
+    const miss=opp.aiMiss;
+    if(Math.random()<miss){
+      // AI misses — player gets chance
+      toast('🤖 ENEMY MISSED!');
+      setTimeout(()=>{
+        if(!G.active)return;
+        [0,1,2,3].forEach(i=>document.getElementById('ob'+i).disabled=false);
+        schedAI();
+      },600);
+    }else{
+      // AI attacks player
+      const dmg=Math.round(10+G.round*3+(Math.random()*5|0));
+      if(G.shield){
+        G.shield=false;document.getElementById('pu-shield').classList.remove('glowing');
+        toast('🛡️ SHIELD BLOCKED THE ATTACK!');
+        [0,1,2,3].forEach(i=>document.getElementById('ob'+i).disabled=false);
+        nextQ();return;
       }
-    },400+Math.random()*900);
-  },delay);
+      showAttackAnim(false);
+      G.pHP=Math.max(0,G.pHP-dmg);
+      G.wrong++;G.totalWrong=(G.totalWrong||0)+1;
+      G.streak=0;
+      dmgPop(dmg,false);updateHP();updateStreakUI();
+      if(G.pHP<=0){setTimeout(()=>endRound(false),800)}
+      else{
+        // Show correct answer
+        const ci=G.curOpts.indexOf(G.curAns);if(ci>=0)document.getElementById('ob'+ci).className='opt-btn correct';
+        document.getElementById('qSub').textContent='ENEMY ATTACKED!';
+        setTimeout(nextQ,1100);
+      }
+    }
+  },d);
 }
 
-// ═══════════════════════════════════════
-//  ANSWER HANDLING
-// ═══════════════════════════════════════
-function answer(i){
+// ═══════════════════════════════════════════════════════
+//  ANSWER
+// ═══════════════════════════════════════════════════════
+function answerQ(i){
   if(!G.active)return;
-  clearTimeout(G._aiId);clearTimeout(G._driftId);
-  const val=G.curOpts[i];
-  processAns(val===G.curAns,i);
+  clearTimeout(G.aiTimer);clearInterval(qTimerIv);
+  [0,1,2,3].forEach(j=>document.getElementById('ob'+j).disabled=true);
+  const ok=G.curOpts[i]===G.curAns;
+  processAns(ok,i);
 }
 
-function pvpKey(e,p){
-  if(e.key!=='Enter')return;
-  if(G.pvpDone[p-1])return;
-  const inp=document.getElementById('pin'+p);
-  const v=parseInt(inp.value);
-  if(isNaN(v))return;
-  G.pvpDone[p-1]=true;
-  const ok=v===G.curAns;
-  inp.style.borderColor=ok?'var(--success)':'var(--danger)';
-  inp.disabled=true;
-  if(ok){
-    const pull=10*G.mult;
-    if(p===1){G.sc1+=Math.round(10*G.mult);ropeShift(pull);animFig('fig1')}
-    else{G.sc2+=Math.round(10*G.mult);ropeShift(-pull,true);animFig('fig2')}
-    updateHUD();
-    if(G.ropePos<=0)end('p1win');
-    else if(G.ropePos>=100)end('p2win');
-    else setTimeout(()=>nextQ(),900);
-  } else {
-    setTimeout(()=>{
-      if(!G.pvpDone[p===1?1:0]){/* wait */}
-    },300);
-  }
-}
-
-function processAns(ok,idx){
+function processAns(ok,idx,tOut=false){
   if(!G.active)return;
-  G.timeSum+=Date.now()-G.qStart;
-  [0,1,2,3].forEach(i=>document.getElementById('o'+i).disabled=true);
-
+  const elapsed=(Date.now()-G.qStart)/1000;G.tSum+=elapsed;
   if(ok){
-    G.correct++;G.streak++;
+    G.correct++;G.totalCorrect=(G.totalCorrect||0)+1;G.streak++;
     if(G.streak>G.maxStreak)G.maxStreak=G.streak;
-    G.mult=G.streak>=10?3:G.streak>=5?2:G.streak>=3?1.5:1;
-
-    let pull=10*G.mult;
-    if(G.boltBoost>0){pull*=2;G.boltBoost--;if(G.boltBoost===0)toast('⚡ Speed boost ended')}
-
-    const speed=Math.max(0,Math.floor((5000-(Date.now()-G.qStart))/100));
-    const pts=Math.round(10*G.mult)+speed;
-    G.sc1+=pts;
-
-    if(idx!=null)document.getElementById('o'+idx).classList.add('ok');
-    flashOK();animFig('fig1');ropeShift(pull);popScore(`+${pts}`,true);
-
-    if(G.streak===3)toast('🔥 3 Streak! ×1.5 Bonus!');
-    else if(G.streak===5)toast('⚡ 5 STREAK! ×2 BONUS!');
+    const mult=G.streak>=10?3:G.streak>=5?2:G.streak>=3?1.5:1;
+    const spd=Math.max(0,(Q_TIME-elapsed)/Q_TIME);
+    let dmg=Math.round((15+spd*20)*mult);
+    const isCrit=elapsed<1.5;
+    if(G.boltBoost){dmg*=3;G.boltBoost=false;document.getElementById('pu-punch').classList.remove('glowing');toast('💥 POWER PUNCH!')}
+    if(isCrit){dmg=Math.round(dmg*1.8);showCombo('CRITICAL HIT!')}
+    else if(G.streak>=10)showCombo('UNSTOPPABLE! ×3')
+    else if(G.streak>=5)showCombo('ON FIRE! ×2')
+    else if(G.streak>=3)showCombo('COMBO! ×1.5');
+    if(idx>=0)document.getElementById('ob'+idx).className='opt-btn correct';
+    // Attack type based on speed
+    const atkType=isCrit?'special':elapsed<3?'kick':'punch';
+    showAttackAnim(true,atkType);
+    addXP(isCrit?20:mult>1?15:10);
+    G.score+=Math.round(dmg*10);G.eHP=Math.max(0,G.eHP-dmg);
+    // burst FX
+    const ef=document.getElementById('eFighter');
+    const er=ef.getBoundingClientRect();
+    burst(er.left+er.width/2,er.top+er.height/2,isCrit?'#ffd700':'#00ff88',isCrit?40:24);
+    dmgPop(dmg,true,isCrit);updateHP();updateStreakUI();
+    if(G.streak===3)toast('🔥 3 STREAK! ×1.5 DMG!');
+    else if(G.streak===5)toast('⚡ 5 STREAK! ×2 DMG!');
     else if(G.streak===10)toast('💫 10 STREAK! ×3 MEGA!');
-    if(G.streak===7){G.pups.bolt=Math.min(G.pups.bolt+1,5);updatePUUI();toast('⚡ Speed Boost earned!')}
-
-    updateHUD();updateStreakUI();
-    if(G.ropePos<=0){end('win');return}
-    setTimeout(nextQ,580);
+    if(G.streak===7){G.pups.punch=Math.min(G.pups.punch+1,5);updatePUUI();toast('💥 Bonus Power Punch!')}
+    if(G.eHP<=0){setTimeout(()=>endRound(true),800)}
+    else setTimeout(nextQ,600);
   }else{
-    G.wrong++;G.streak=0;G.mult=1;
-
+    G.wrong++;G.totalWrong=(G.totalWrong||0)+1;G.streak=0;
+    if(idx>=0)document.getElementById('ob'+idx).className='opt-btn wrong';
+    const ci=G.curOpts.indexOf(G.curAns);if(ci>=0)document.getElementById('ob'+ci).className='opt-btn correct';
+    if(tOut)document.getElementById('qSub').textContent='⏰ TIME UP!';
+    else document.getElementById('qSub').textContent='WRONG! ENEMY ATTACKS!';
     if(G.shield){
-      G.shield=false;
-      document.getElementById('pup-shield').style.boxShadow='';
-      if(idx!=null)document.getElementById('o'+idx).classList.add('ng');
-      showCorrectOpt();
-      toast('🛡️ Shield blocked the mistake!');
-      updateStreakUI();
-      setTimeout(nextQ,1000);return;
+      G.shield=false;document.getElementById('pu-shield').classList.remove('glowing');
+      toast('🛡️ SHIELD SAVED YOU!');updateStreakUI();setTimeout(nextQ,1100);return;
     }
-
-    if(idx!=null)document.getElementById('o'+idx).classList.add('ng');
-    showCorrectOpt();
-    flashNG();ropeShift(-8,true);
-    document.getElementById('qDisp').classList.add('shake');
-    setTimeout(()=>document.getElementById('qDisp').classList.remove('shake'),450);
-
-    updateHUD();updateStreakUI();
-
-    if(G.mode==='surv'){
-      G.lives--;renderLives();
-      if(G.lives<=0){end('dead');return}
-      toast(`❤️ ${G.lives} ${G.lives===1?'life':'lives'} left`);
-    }
-    if(G.mode==='solo')ropeShift(-4,true);
-    if(G.ropePos>=100){end('lose');return}
-    setTimeout(nextQ,1150);
+    const dmg=Math.round(10+G.round*3+(Math.random()*5|0));
+    showAttackAnim(false);
+    // burst on player
+    const pf=document.getElementById('pFighter');
+    const pr=pf.getBoundingClientRect();
+    burst(pr.left+pr.width/2,pr.top+pr.height/2,'#ff2244',18);
+    G.pHP=Math.max(0,G.pHP-dmg);
+    dmgPop(dmg,false);updateHP();updateStreakUI();
+    if(G.pHP<=0){setTimeout(()=>endRound(false),800)}
+    else setTimeout(nextQ,1200);
   }
 }
 
-function showCorrectOpt(){
-  const ci=G.curOpts.indexOf(G.curAns);
-  if(ci>=0)document.getElementById('o'+ci).classList.add('ok');
+// ═══════════════════════════════════════════════════════
+//  ANIMATIONS
+// ═══════════════════════════════════════════════════════
+function showAttackAnim(isPlayer,type='punch'){
+  const atk=document.querySelector(isPlayer?'#pFighter .fighter':'#eFighter .fighter');
+  const def=document.querySelector(isPlayer?'#eFighter .fighter':'#pFighter .fighter');
+  if(!atk||!def)return;
+  atk.classList.remove('punch','kick','special','hit','win-anim','ko');
+  def.classList.remove('punch','kick','special','hit','win-anim','ko');
+  void atk.offsetWidth;
+  atk.classList.add(type);
+  setTimeout(()=>{
+    atk.classList.remove(type);
+    def.classList.add('hit');
+    setTimeout(()=>def.classList.remove('hit'),400);
+  },300);
+}
+function showWin(isPlayer){
+  const w=document.querySelector(isPlayer?'#pFighter .fighter':'#eFighter .fighter');
+  const l=document.querySelector(isPlayer?'#eFighter .fighter':'#pFighter .fighter');
+  if(w)w.classList.add('win-anim');
+  if(l)l.classList.add('ko');
 }
 
-// ═══════════════════════════════════════
-//  ROPE
-// ═══════════════════════════════════════
-function ropeShift(amt){
-  G.ropePos=Math.max(0,Math.min(100,G.ropePos-amt));
-  updateRope();
-}
-function updateRope(){
-  const p=G.ropePos;
-  document.getElementById('knot').style.left=p+'%';
-  document.getElementById('ropeL').style.width=Math.max(0,50-p)+'%';
-  document.getElementById('ropeR').style.width=Math.max(0,p-50)+'%';
-  const knot=document.getElementById('knot');
-  knot.style.animation=(p<25||p>75)?'glow-pulse .5s infinite':'';
+// DAMAGE POP
+function dmgPop(n,isPlayerHit,crit=false){
+  const el=document.createElement('div');el.className='dmg-pop';
+  const x=isPlayerHit?(window.innerWidth*.72):(window.innerWidth*.28);
+  const y=window.innerHeight*.4;
+  el.style.cssText=`left:${x}px;top:${y}px;color:${crit?'#ffd700':isPlayerHit?'#00ff88':'#ff4466'};font-size:${crit?'46px':'34px'}`;
+  el.textContent=(crit?'💥':'')+(isPlayerHit?'+':'-')+n+(crit?'!!':'!');
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1100);
 }
 
-// ═══════════════════════════════════════
-//  POWERUPS
-// ═══════════════════════════════════════
-function usePowerup(type){
-  if(!G.active||G.pups[type]<=0)return;
-  G.pups[type]--;updatePUUI();
-  if(type==='bolt'){G.boltBoost=3;toast('⚡ SPEED BOOST! Next 3 answers = ×2 pull!')}
-  else if(type==='shield'){G.shield=true;document.getElementById('pup-shield').style.boxShadow='0 0 16px var(--gold)';toast('🛡️ Shield ON! Next mistake blocked!')}
-  else if(type==='freeze'){
-    G.frozen=true;clearTimeout(G._aiId);document.getElementById('aiThink').style.display='none';
-    document.getElementById('freezeFrame').classList.add('on');
-    toast('❄️ AI FROZEN for 5 seconds!');
-    setTimeout(()=>{document.getElementById('freezeFrame').classList.remove('on');G.frozen=false;if(G.active&&G.mode==='solo')scheduleAI();},5000);
-  }
+// COMBO POP
+function showCombo(txt){
+  document.querySelectorAll('.combo-pop').forEach(e=>e.remove());
+  const el=document.createElement('div');el.className='combo-pop';el.textContent=txt;
+  document.body.appendChild(el);setTimeout(()=>el.remove(),900);
+}
+
+// ═══════════════════════════════════════════════════════
+//  UI UPDATES
+// ═══════════════════════════════════════════════════════
+function updateHP(){
+  const pp=Math.max(0,G.pHP/G.pMaxHP*100),ep=Math.max(0,G.eHP/G.eMaxHP*100);
+  document.getElementById('pHpBar').style.width=pp+'%';
+  document.getElementById('eHpBar').style.width=ep+'%';
+  document.getElementById('pHpNum').textContent=G.pHP;
+  document.getElementById('eHpNum').textContent=G.eHP;
+  if(pp<30)document.getElementById('pHpBar').style.background='linear-gradient(90deg,#aa0000,#ff2244)';
+  if(ep<30)document.getElementById('eHpBar').style.background='linear-gradient(270deg,#aa0000,#ff2244)';
+  if(pp<30){document.getElementById('pHpWrap').classList.add('shaking');setTimeout(()=>document.getElementById('pHpWrap').classList.remove('shaking'),400)}
+}
+function updateStreakUI(){
+  document.getElementById('comboDisp').textContent=G.streak>=3?'🔥'+G.streak+' STREAK':'';
+  const mult=G.streak>=10?'×3':G.streak>=5?'×2':G.streak>=3?'×1.5':'';
+  document.getElementById('streakDisp').textContent=mult?mult+' DMG':'';
 }
 function updatePUUI(){
-  ['bolt','shield','freeze'].forEach(k=>{
-    document.getElementById('cnt-'+k).textContent=G.pups[k];
-    document.getElementById('pup-'+k).classList.toggle('off',G.pups[k]<=0);
+  ['punch','shield','freeze'].forEach(k=>{
+    document.getElementById('pc-'+k).textContent=G.pups[k];
+    document.getElementById('pu-'+k).classList.toggle('off',G.pups[k]<=0);
   });
 }
 
-// ═══════════════════════════════════════
-//  UI HELPERS
-// ═══════════════════════════════════════
-function updateHUD(){
-  document.getElementById('sc1').textContent=G.sc1;
-  document.getElementById('sc2').textContent=G.sc2;
-}
-function updateStreakUI(){
-  document.getElementById('streakNum').textContent=G.streak;
-  const bd=document.getElementById('streakBadge');
-  if(G.mult>1){bd.style.display='inline';bd.textContent='×'+G.mult}else bd.style.display='none';
-}
-function renderLives(){
-  const r=document.getElementById('livesRow');r.innerHTML='';
-  if(G.mode!=='surv')return;
-  for(let i=0;i<3;i++){const s=document.createElement('span');s.className='life-h'+(i>=G.lives?' gone':'');s.textContent='❤️';r.appendChild(s)}
-}
-function updateTimebar(){
-  document.getElementById('timebarFill').style.width=(G.timeLeft/60*100)+'%';
-}
-function animFig(id){
-  const el=document.getElementById(id);
-  const tx=id==='fig1'?'-14px':'14px';
-  el.style.transform=`translateX(${tx}) scale(1.22)`;
-  setTimeout(()=>el.style.transform='',400);
-}
-function flashOK(){
-  const f=document.getElementById('flash');f.className='flash ok-f on';
-  setTimeout(()=>f.classList.remove('on'),280);
-}
-function flashNG(){
-  const f=document.getElementById('flash');f.className='flash ng-f on';
-  setTimeout(()=>f.classList.remove('on'),280);
-}
-function popScore(txt,ok){
-  const el=document.createElement('div');el.className='spop';el.textContent=txt;
-  el.style.cssText=`color:${ok?'var(--success)':'var(--danger)'};left:${25+Math.random()*50}%;top:38%`;
-  document.body.appendChild(el);setTimeout(()=>el.remove(),1250);
-}
-function toast(msg){
-  document.querySelectorAll('.toast').forEach(t=>t.remove());
-  const el=document.createElement('div');el.className='toast';el.textContent=msg;
-  document.body.appendChild(el);setTimeout(()=>el.remove(),2700);
+// ═══════════════════════════════════════════════════════
+//  POWER-UPS
+// ═══════════════════════════════════════════════════════
+function usePU(type){
+  if(!G.active||G.pups[type]<=0)return;
+  G.pups[type]--;updatePUUI();
+  if(type==='punch'){G.boltBoost=true;document.getElementById('pu-punch').classList.add('glowing');toast('💥 POWER PUNCH READY! Next answer = ×3!')}
+  else if(type==='shield'){G.shield=true;document.getElementById('pu-shield').classList.add('glowing');toast('🛡️ SHIELD ACTIVE! Next hit blocked!')}
+  else if(type==='freeze'){
+    G.frozen=true;clearTimeout(G.aiTimer);document.getElementById('fzOv').style.display='block';
+    toast('❄️ ENEMY FROZEN for 5 seconds!');
+    setTimeout(()=>{document.getElementById('fzOv').style.display='none';G.frozen=false;if(G.active)schedAI()},5000);
+  }
 }
 
-// ═══════════════════════════════════════
-//  GAME END
-// ═══════════════════════════════════════
-function end(reason){
+// ═══════════════════════════════════════════════════════
+//  ROUND END
+// ═══════════════════════════════════════════════════════
+function endRound(playerWon){
   if(!G.active)return;
-  G.active=false;clearAll();
-  document.getElementById('timebar').style.display='none';
-  document.getElementById('freezeFrame').classList.remove('on');
-
-  const wins=['win','p1win','timeout_win'];
-  const isW=reason==='win'||reason==='p1win'||(reason==='timeout'&&G.sc1>G.sc2);
-  const isDraw=reason==='timeout'&&G.sc1===G.sc2;
-
-  let emoji,title;
-  if(isW){emoji='🏆';title='VICTORY!'}
-  else if(isDraw){emoji='🤝';title="IT'S A DRAW!"}
-  else if(reason==='dead'){emoji='💀';title='GAME OVER!'}
-  else if(reason==='p2win'){emoji='😤';title='P2 WINS!'}
-  else if(reason==='timeout'){emoji='⏱️';title='TIME\'S UP!'}
-  else{emoji='😔';title='DEFEATED!'}
-
+  G.active=false;clearTimeout(G.aiTimer);clearInterval(qTimerIv);
+  document.getElementById('fzOv').style.display='none';
   const acc=G.total>0?Math.round(G.correct/G.total*100):0;
-  const avg=G.total>0?((G.timeSum/G.total)/1000).toFixed(1):'0';
-
-  document.getElementById('resEmoji').textContent=emoji;
-  document.getElementById('resTitle').textContent=title;
-  document.getElementById('resTitle').style.color=isW?'var(--success)':isDraw?'var(--gold)':'var(--danger)';
-  document.getElementById('statsGrid').innerHTML=`
-    <div class="stat-box"><div class="stat-lbl">SCORE</div><div class="stat-val">${G.sc1}</div></div>
-    <div class="stat-box"><div class="stat-lbl">ACCURACY</div><div class="stat-val">${acc}%</div></div>
-    <div class="stat-box"><div class="stat-lbl">MAX STREAK</div><div class="stat-val">${G.maxStreak}🔥</div></div>
-    <div class="stat-box"><div class="stat-lbl">AVG SPEED</div><div class="stat-val">${avg}s</div></div>
-  `;
-
-  const saveable=isW||G.mode==='time'||G.mode==='surv'||G.isDaily;
-  document.getElementById('nameWrap').style.display=saveable?'block':'none';
-  document.getElementById('nameIn').value='';
-
-  if(G.isDaily){
-    const key=todayKey();
-    try{localStorage.setItem('daily_'+key,JSON.stringify({score:G.sc1,acc,maxStreak:G.maxStreak}))}catch(e){}
-  }
-
-  showScreen('resultScreen');
-}
-
-function saveAndRetry(){
-  const inp=document.getElementById('nameIn');
-  if(document.getElementById('nameWrap').style.display!=='none'){saveScore(inp.value||'PLAYER')}
-  showScreen('modeScreen');
-}
-
-function quitGame(){
-  clearAll();G.active=false;
-  document.getElementById('timebar').style.display='none';
-  document.getElementById('freezeFrame').classList.remove('on');
-  showScreen('menuScreen');
-}
-
-function clearAll(){
-  clearInterval(G._timerId);clearTimeout(G._aiId);clearTimeout(G._driftId);
-}
-
-// ═══════════════════════════════════════
-//  LEADERBOARD
-// ═══════════════════════════════════════
-function saveScore(name){
-  name=(name||'PLAYER').toUpperCase().substring(0,12);
-  let scores=[];
-  try{scores=JSON.parse(localStorage.getItem('mtow_scores')||'[]')}catch(e){}
-  const acc=G.total>0?Math.round(G.correct/G.total*100):0;
-  scores.push({name,score:G.sc1,mode:G.isDaily?'daily':G.mode,diff:G.diff,acc,maxStreak:G.maxStreak,date:new Date().toLocaleDateString('en-IN')});
-  scores.sort((a,b)=>b.score-a.score);
-  try{localStorage.setItem('mtow_scores',JSON.stringify(scores.slice(0,60)))}catch(e){}
-}
-
-function renderLB(filter){
-  let scores=[];
-  try{scores=JSON.parse(localStorage.getItem('mtow_scores')||'[]')}catch(e){}
-  const list=filter==='all'?scores:scores.filter(s=>s.mode===filter);
-  const el=document.getElementById('lbList');
-  if(!list.length){
-    el.innerHTML='<div style="text-align:center;color:var(--muted);padding:40px 0;font-family:Orbitron,monospace;font-size:11px;letter-spacing:2px">NO SCORES YET<br><br>PLAY TO CLAIM THE TOP SPOT!</div>';return;
-  }
-  el.innerHTML=list.slice(0,12).map((s,i)=>`
-    <div class="lb-item">
-      <div class="lb-rank ${i<3?'r'+(i+1):''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)}</div>
-      <div class="lb-info">
-        <div class="lb-name">${s.name}</div>
-        <div class="lb-meta">${(s.mode||'').toUpperCase()} · ${(s.diff||'').toUpperCase()} · ${s.date||''}</div>
-      </div>
-      <div class="lb-right">
-        <div class="lb-score">${s.score}</div>
-        <div class="lb-mini">${s.acc}% · 🔥${s.maxStreak}</div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function filterLB(f,el){
-  document.querySelectorAll('#lbFilters .pill').forEach(b=>b.classList.remove('sel'));
-  el.classList.add('sel');renderLB(f);
-}
-function clearLB(){
-  if(confirm('Clear ALL scores? This cannot be undone.'))
-  {try{localStorage.removeItem('mtow_scores')}catch(e){}renderLB('all')}
-}
-
-// ═══════════════════════════════════════
-//  DAILY CHALLENGE
-// ═══════════════════════════════════════
-function todayKey(){
-  const d=new Date();return`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
-}
-function getDailySeed(){
-  const k=todayKey();let h=0;
-  for(const c of k)h=((h<<5)-h)+c.charCodeAt(0);
-  return Math.abs(h);
-}
-
-function handleDaily(){
-  const k=todayKey();
-  let played=null;
-  try{played=localStorage.getItem('daily_'+k)}catch(e){}
-  if(played){
-    const d=JSON.parse(played);
-    document.getElementById('dailyTitle').textContent='COMPLETED TODAY!';
-    document.getElementById('dailyContent').innerHTML=`
-      <div class="result-box" style="margin-top:14px;animation:bounceIn .4s ease">
-        <span style="font-size:52px">✅</span>
-        <p style="margin:10px 0;color:var(--muted);font-size:11px;letter-spacing:2px">CHALLENGE DONE!</p>
-        <div class="stats-grid">
-          <div class="stat-box"><div class="stat-lbl">SCORE</div><div class="stat-val">${d.score}</div></div>
-          <div class="stat-box"><div class="stat-lbl">ACCURACY</div><div class="stat-val">${d.acc}%</div></div>
-        </div>
-        <p style="font-size:10px;color:var(--muted);margin-top:10px;letter-spacing:1px">Come back tomorrow for a new one!</p>
-        <button class="btn btn-g" onclick="showLB()" style="margin-top:14px">🏆 LEADERBOARD</button>
-        <button class="btn btn-c" onclick="showScreen('menuScreen')" style="margin-top:0">🏠 MENU</button>
-      </div>
-    `;
-    showScreen('dailyScreen');
+  const avg=G.total>0?(G.tSum/G.total).toFixed(1):'0';
+  G.totalCorrect=(G.totalCorrect||0);
+  G.totalQ=(G.totalQ||0)+G.total;
+  if(playerWon){
+    showWin(true);confetti();addXP(100+G.round*20);
+    const box=document.getElementById('rrBox');
+    box.style.borderColor='var(--green)';
+    document.getElementById('rrEmoji').textContent='🏆';
+    document.getElementById('rrTitle').textContent='KNOCKOUT!';
+    document.getElementById('rrTitle').style.color='var(--green)';
+    document.getElementById('rrSub').textContent='YOU DEFEATED '+OPPS[G.round].name+'!';
+    document.getElementById('rrStats').innerHTML=`
+      <div class="rs"><div class="rs-l">SCORE</div><div class="rs-v">${G.score}</div></div>
+      <div class="rs"><div class="rs-l">ACCURACY</div><div class="rs-v">${acc}%</div></div>
+      <div class="rs"><div class="rs-l">MAX STREAK</div><div class="rs-v">${G.maxStreak}🔥</div></div>`;
+    const isLast=G.round>=OPPS.length-1;
+    document.getElementById('rrBtns').innerHTML=isLast
+      ?`<button class="mbtn g" onclick="showVictory()">🏆 CLAIM VICTORY!</button>`
+      :`<button class="mbtn c" onclick="nextRound()">⚔️ NEXT OPPONENT →</button>
+        <button class="mbtn g" onclick="SS('s-menu')">🏠 REST (MENU)</button>`;
+    setTimeout(()=>document.getElementById('roundResult').classList.add('on'),600);
   }else{
-    // Start daily - force medium, all ops
-    selDiff='med'; selOps=['+','-','×','÷'];
-    toast('📅 Daily Challenge! Medium · All Ops · vs AI');
-    startGame(true,getDailySeed());
+    showWin(false);
+    showGameOver();
   }
 }
 
-// ═══════════════════════════════════════
-//  KEYBOARD
-// ═══════════════════════════════════════
+function nextRound(){
+  document.getElementById('roundResult').classList.remove('on');
+  G.round++;
+  // Give HP back (partial heal between rounds)
+  G.pHP=Math.min(G.pMaxHP,G.pHP+Math.round(G.pMaxHP*.3));
+  initG();
+  showVS();
+}
+
+function showGameOver(){
+  const acc=G.total>0?Math.round(G.correct/G.total*100):0;
+  document.getElementById('goStats').innerHTML=`
+    <div class="rs"><div class="rs-l">ROUND</div><div class="rs-v">${G.round+1}/7</div></div>
+    <div class="rs"><div class="rs-l">SCORE</div><div class="rs-v">${G.score||0}</div></div>
+    <div class="rs"><div class="rs-l">ACCURACY</div><div class="rs-v">${acc}%</div></div>`;
+  saveScore();
+  setTimeout(()=>document.getElementById('gameOver').classList.add('on'),700);
+}
+
+function retryFight(){
+  document.getElementById('gameOver').classList.remove('on');
+  G.pHP=G.pMaxHP;initG();showVS();
+}
+function quitFight(){
+  G.active=false;clearTimeout(G.aiTimer);clearInterval(qTimerIv);
+  document.getElementById('fzOv').style.display='none';
+  document.getElementById('roundResult').classList.remove('on');
+  document.getElementById('gameOver').classList.remove('on');
+  SS('s-menu');
+}
+
+// ═══════════════════════════════════════════════════════
+//  FINAL VICTORY
+// ═══════════════════════════════════════════════════════
+function showVictory(){
+  document.getElementById('roundResult').classList.remove('on');
+  const total=G.totalQ||G.total;
+  const acc=total>0?Math.round((G.totalCorrect||G.correct)/total*100):0;
+  const time=Math.round((Date.now()-(G.sessionStart||Date.now()))/1000/60);
+  document.getElementById('finalStats').innerHTML=`FINAL SCORE: <span style="color:var(--gold);font-family:Bangers,cursive;font-size:20px">${G.score}</span><br>ACCURACY: ${acc}% &nbsp;·&nbsp; PLAYTIME: ${time} MIN<br>XP EARNED: ${XP.cur} &nbsp;·&nbsp; LVL ${XP.lvl}`;
+  document.getElementById('lvlTxt').textContent='LVL '+XP.lvl;
+  document.getElementById('xpTxt').textContent=XP.cur+' / '+XP.max+' XP';
+  setTimeout(()=>document.getElementById('xpBarF').style.width=(XP.cur/XP.max*100)+'%',500);
+  saveScore();confetti();confetti();
+  SS('s-victory');
+}
+
+// ═══════════════════════════════════════════════════════
+//  LEADERBOARD
+// ═══════════════════════════════════════════════════════
+function saveScore(){
+  let sc=[];try{sc=JSON.parse(localStorage.getItem('mf_sc')||'[]')}catch(e){}
+  const acc=G.total>0?Math.round(G.correct/G.total*100):0;
+  sc.push({name:CHAR_NAMES[selCharIdx],score:G.score||0,round:G.round+1,acc,streak:G.maxStreak,lvl:XP.lvl,date:new Date().toLocaleDateString('en-IN')});
+  sc.sort((a,b)=>b.score-a.score);
+  try{localStorage.setItem('mf_sc',JSON.stringify(sc.slice(0,30)))}catch(e){}
+}
+function showLB(){
+  let sc=[];try{sc=JSON.parse(localStorage.getItem('mf_sc')||'[]')}catch(e){}
+  const el=document.getElementById('lbList');
+  if(!sc.length){el.innerHTML='<div style="text-align:center;padding:40px;color:rgba(255,255,255,.3);font-family:Bangers,cursive;font-size:18px;letter-spacing:3px">NO FIGHTERS YET!<br><br>BE THE FIRST CHAMPION!</div>';SS('s-lb');return}
+  const medals=['🥇','🥈','🥉'];
+  el.innerHTML=sc.slice(0,10).map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;margin:6px 0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(255,215,0,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.08)'">
+      <div style="font-family:'Bangers',cursive;font-size:20px;min-width:30px;color:${i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'rgba(255,255,255,.4)'}">${i<3?medals[i]:(i+1)}</div>
+      <div style="flex:1"><div style="font-weight:700;font-size:15px">${s.name}</div><div style="font-size:10px;color:rgba(255,255,255,.4);letter-spacing:1px;margin-top:2px">ROUND ${s.round}/7 · LVL ${s.lvl||1} · ${s.date||''}</div></div>
+      <div style="text-align:right"><div style="font-family:'Bangers',cursive;font-size:20px;color:var(--p1)">${s.score}</div><div style="font-size:10px;color:rgba(255,255,255,.4)">${s.acc}% · 🔥${s.streak}</div></div>
+    </div>`).join('');
+  SS('s-lb');
+}
+function clrLB(){if(confirm('Clear all records?')){try{localStorage.removeItem('mf_sc')}catch(e){}showLB()}}
+
+// ═══════════════════════════════════════════════════════
+//  MISC
+// ═══════════════════════════════════════════════════════
+function showStory(){SS('s-story')}
+function toast(msg){
+  document.querySelectorAll('.tst').forEach(t=>t.remove());
+  const el=document.createElement('div');el.className='tst';el.textContent=msg;
+  document.body.appendChild(el);setTimeout(()=>el.remove(),2900);
+}
 document.addEventListener('keydown',e=>{
-  if(!G.active||G.mode==='pvp')return;
-  if(['1','2','3','4'].includes(e.key)){
-    const b=document.getElementById('o'+(parseInt(e.key)-1));
-    if(b&&!b.disabled)b.click();
-  }
-  if(e.key==='Escape')quitGame();
+  if(!G.active)return;
+  if(['1','2','3','4'].includes(e.key)){const b=document.getElementById('ob'+(+e.key-1));if(b&&!b.disabled)b.click()}
+  if(e.key==='Escape')quitFight();
+  if(e.key==='q'||e.key==='Q')usePU('punch');
+  if(e.key==='w'||e.key==='W')usePU('shield');
+  if(e.key==='e'||e.key==='E')usePU('freeze');
+});
+// Ripple
+document.addEventListener('pointerdown',e=>{
+  const btn=e.target.closest('.opt-btn');if(!btn)return;
+  const r=document.createElement('span');r.className='ripple';
+  const rect=btn.getBoundingClientRect();const sz=Math.max(rect.width,rect.height);
+  r.style.cssText=`width:${sz}px;height:${sz}px;left:${e.clientX-rect.left-sz/2}px;top:${e.clientY-rect.top-sz/2}px`;
+  btn.appendChild(r);setTimeout(()=>r.remove(),600);
 });
 </script>
 </body>
